@@ -1,0 +1,57 @@
+﻿using System;
+using Unity.Collections;
+using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
+
+namespace Assets.Scripts
+{
+    [Serializable]
+    public struct LudoPlayerInfo : INetworkSerializable, IEquatable<LudoPlayerInfo>
+    {
+        public FixedString64Bytes ID;
+        public FixedString32Bytes Name;
+        public int AvatarID;
+
+        private const string k_playerID = "PlayerID";
+        private const string k_playerName = "PlayerName";
+        private const string k_playerAvatarID = "PlayerAvatarID";
+
+        public LudoPlayerInfo(Player player)
+        {
+            ID = player.Data[k_playerID].Value;
+            Name = player.Data[k_playerName].Value;
+            AvatarID = int.Parse(player.Data[k_playerAvatarID].Value);
+        }
+
+        public static LudoPlayerInfo nullInstance = new()
+        {
+            ID = "",
+            Name = "",
+            AvatarID = -1,
+        };
+
+        public bool Equals(LudoPlayerInfo other)
+        {
+            return ID == other.ID;
+        }
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref ID);
+            serializer.SerializeValue(ref Name);
+            serializer.SerializeValue(ref AvatarID);
+        }
+
+        public Player GetPlayerData()
+        {
+            return new Player()
+            {
+                Data = new() {
+                    { k_playerID, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, ID.ToString()) },
+                    { k_playerName, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, Name.ToString()) },
+                    { k_playerAvatarID, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, AvatarID.ToString()) },
+                }
+            };
+        }
+    }
+}
