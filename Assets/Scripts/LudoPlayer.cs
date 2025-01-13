@@ -1,5 +1,6 @@
 using Assets.Scripts;
 using Assets.Scripts.Helpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -124,7 +125,7 @@ public class LudoPlayer : MonoBehaviour
     {
         if (dest.Index == PlayerParameter.WinningSpaceIndex)
         {
-            token.gameObject.SetActive(false);
+            token.Enter();
             return;
         }
 
@@ -133,12 +134,12 @@ public class LudoPlayer : MonoBehaviour
         dest.IsOccupied = true;
     }
 
-    internal void MoveTokenToHouse(Token tokenToEat)
+    internal void MoveTokenToHouse(Token eatenToken)
     {
-        TokenSpace currentTokenSpace = tokenToEat.currentPosition;
+        TokenSpace currentTokenSpace = eatenToken.currentPosition;
         var availableSpawnSpace = SpawnSpaces.FirstOrDefault(spawnSpace => !spawnSpace.IsOccupied);
-        MoveToken(tokenToEat, availableSpawnSpace, true);
-        tokenToEat.IsInHouse = true;
+        MoveToken(eatenToken, availableSpawnSpace, true);
+        eatenToken.IsInHouse = true;
     }
 
     public void SetupLocalBoard()
@@ -171,6 +172,8 @@ public class LudoPlayer : MonoBehaviour
                 res.Add(token.ID, newSpace);
             }
         });
+
+        Debug.Log("Found " +  res.Count + " tokens to play");
 
         return res;
     }

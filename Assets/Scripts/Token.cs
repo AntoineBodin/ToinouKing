@@ -61,4 +61,11 @@ public class Token : MonoBehaviour
 
         return newPositionIndex;
     }
+
+    public void Enter()
+    {
+        this.sprite.sprite = null;
+        this.HasWon = true;
+        this.currentPosition = null;
+    }
 }
