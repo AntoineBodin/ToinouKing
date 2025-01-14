@@ -20118,7 +20118,6 @@ MonoBehaviour:
   - {fileID: 69399514}
   - {fileID: 1480066332}
   - {fileID: 379304635}
-  gameManager: {fileID: 1731515873}
 --- !u!4 &1846955582
 Transform:
   m_ObjectHideFlags: 0
@@ -23581,6 +23580,7 @@ MonoBehaviour:
   HostGameButton: {fileID: 1944912200}
   JoinGameButton: {fileID: 606319603}
   StartGameOnlineButton: {fileID: 729912915}
+  StartGameOfflineButton: {fileID: 1563052555}
   PlayWith2Players: {fileID: 1035724379}
   PlayWith3Players: {fileID: 1214543855}
   PlayWith4Players: {fileID: 1147059273}

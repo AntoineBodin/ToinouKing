@@ -8,7 +8,6 @@ public class Token : MonoBehaviour
     public bool IsInHouse = true;
     public Animator IdleAnimator;
     public Collider2D Collider;
-    public GameManager GameManager;
     public bool HasWon = false;
     internal LudoPlayer player;
     internal TokenSpace currentPosition;
@@ -18,9 +17,9 @@ public class Token : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (GameManager.CanPlayIfOnline)
+        if (GameManager.Instance.CanPlayIfOnline)
         {
-            GameManager.PickToken(ID);
+            GameManager.Instance.PickToken(ID);
         }
     }
 

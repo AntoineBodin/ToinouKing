@@ -11,14 +11,12 @@ public class LobbyManager : NetworkBehaviour
 
     [SerializeField]
     private List<PlayerUI> playerLobbyUIs;
-    [SerializeField]
-    private GameManager gameManager;
     private ILobbyEvents m_LobbyEvents;
 
     public void StartGame()
     {
         List<LudoPlayerInfo> players = Multiplayer.Instance.CurrentLobby.Players.Select(p => new LudoPlayerInfo(p)).ToList();
-        int firstPlayerIndex = UnityEngine.Random.Range(0, players.Count);
+        int firstPlayerIndex = Random.Range(0, players.Count);
         
         StartGame_ClientRpc(firstPlayerIndex);
     }
@@ -58,7 +56,7 @@ public class LobbyManager : NetworkBehaviour
 
         GameMenuNavigator.Instance.DisplayBoardCanvas();
         players.ForEach(p => Debug.Log(p.Name + "is in the lobby"));
-        gameManager.StartGame(gameParameters);
+        GameManager.Instance.StartGame(gameParameters);
     }
 
 
