@@ -17,10 +17,11 @@ jobs:
     # 2. Configurer Unity pour le build WebGL
     - name: Set up Unity
       uses: game-ci/unity-builder@v2
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         unityVersion: '6000.0.24f1' # Remplace par ta version Unity
         targetPlatform: WebGL
-        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
     # 3. Build du jeu WebGL
     - name: Build WebGL game
