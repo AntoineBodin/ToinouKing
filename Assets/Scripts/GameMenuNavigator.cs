@@ -112,6 +112,7 @@ public class GameMenuNavigator : MonoBehaviour
         DisplayLobbyCanvas();
     }
 
+
     private void StartGameOnline()
     {
         LobbyManager.StartGame();
