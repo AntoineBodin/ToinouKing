@@ -14,13 +14,12 @@ public class LudoPlayer : MonoBehaviour
     public List<TokenSpace> SpawnSpaces;
     public List<TokenSpace> LocalBoard;
     public List<Token> Tokens;
-    public GameManager GameManager;
     public PlayerParameter PlayerParameter;
     public LudoPlayerInfo PlayerInfo;
     public TokenSpace StartSpace { get; internal set; }
     public bool IsBlank = false;
 
-    public void InstantiateToHome(GameObject tokenPrefab, GameObject canvas, int playerIndex)
+    public void SpawnTokens(GameObject tokenPrefab, GameObject canvas, int playerIndex)
     {
         int tokenIndex = 0;
         SpawnSpaces.ForEach(space =>
@@ -29,7 +28,7 @@ public class LudoPlayer : MonoBehaviour
            
             Token token = SetupToken(newToken, space, canvas, playerIndex * 4 + tokenIndex);
 
-            GameManager.AddToken(token);
+            GameManager.Instance.AddToken(token);
 
             MoveToken(token, space, true);
 
@@ -48,7 +47,6 @@ public class LudoPlayer : MonoBehaviour
         token.ID = id;
         token.sprite.color = PlayerParameter.TokenColor;
         token.SetPlayer(this);
-        token.GameManager = GameManager;
         Tokens.Add(token);
 
         return token;
@@ -148,14 +146,14 @@ public class LudoPlayer : MonoBehaviour
         int index = PlayerParameter.StartingIndex;
         for (int counter = 0; counter < 51; counter++)
         {
-            board.Add(GameManager.TokenSpaces[index]);
+            board.Add(GameManager.Instance.TokenSpaces[index]);
             index++;
             index %= 52;
         }
 
         for (int counter = PlayerParameter.StartingIndexAfterHome; counter <= PlayerParameter.WinningSpaceIndex; counter++)
         {
-            board.Add(GameManager.TokenSpaces[counter]);
+            board.Add(GameManager.Instance.TokenSpaces[counter]);
         }
         LocalBoard = board;
     }

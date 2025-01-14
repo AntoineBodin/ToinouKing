@@ -1,4 +1,6 @@
 using Assets.Scripts;
+using System;
+using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -21,6 +23,7 @@ public class GameMenuNavigator : MonoBehaviour
     public Button HostGameButton;
     public Button JoinGameButton;
     public Button StartGameOnlineButton;
+    public Button StartGameOfflineButton;
 
     public Toggle PlayWith2Players;
     public Toggle PlayWith3Players;
@@ -54,7 +57,8 @@ public class GameMenuNavigator : MonoBehaviour
         PlayOnlineButton.onClick.AddListener(DisplayPlayOnlinePanel);
         HostGameButton.onClick.AddListener(HostGame);
         JoinGameButton.onClick.AddListener(QuickJoinGame);
-        StartGameOnlineButton.onClick.AddListener(StartGame);
+        StartGameOnlineButton.onClick.AddListener(StartGameOnline);
+        StartGameOfflineButton.onClick.AddListener(StartGameOffline);
     }
 
     private void DisplayPlayPanel()
@@ -108,19 +112,22 @@ public class GameMenuNavigator : MonoBehaviour
         DisplayLobbyCanvas();
     }
 
-    private void StartGame()
+    private void StartGameOnline()
     {
         LobbyManager.StartGame();
     }
 
-    private void StartGameOnline() 
+    private void StartGameOffline()
     {
-    
+        DisplayBoardCanvas();
+        GameManager.Instance.StartGame(GetOfflineGameParameters());
     }
+
     private void StartGameLocal() { }
 
     public void DisplayBoardCanvas()
     {
+        GameMenuCanvas.enabled = false;
         LobbyCanvas.enabled = false;
         boardCanvas.enabled = true;
     }
@@ -131,21 +138,24 @@ public class GameMenuNavigator : MonoBehaviour
 
     private void SetupToggles()
     {
-        PlayWith2Players.onValueChanged.AddListener((bool isOn) => {
+        PlayWith2Players.onValueChanged.AddListener((bool isOn) =>
+        {
             if (isOn)
             {
                 SelectPlayWith2Players();
             }
         });
 
-        PlayWith3Players.onValueChanged.AddListener((bool isOn) => {
+        PlayWith3Players.onValueChanged.AddListener((bool isOn) =>
+        {
             if (isOn)
             {
                 SelectPlayWith3Players();
             }
         });
 
-        PlayWith4Players.onValueChanged.AddListener((bool isOn) => {
+        PlayWith4Players.onValueChanged.AddListener((bool isOn) =>
+        {
             if (isOn)
             {
                 SelectPlayWith4Players();
@@ -153,38 +163,39 @@ public class GameMenuNavigator : MonoBehaviour
         });
     }
 
-    private void SelectPlayWith2Players() 
+    private void SelectPlayWith2Players()
     {
         UnSelect3And4PlayersOptions();
         Player3Name.interactable = false;
         Player4Name.interactable = false;
     }
-    
+
     private void SelectPlayWith3Players()
     {
         UnSelect2And4PlayersOptions();
         Player3Name.interactable = true;
         Player4Name.interactable = false;
     }
-    
-    private void SelectPlayWith4Players() {
+
+    private void SelectPlayWith4Players()
+    {
         UnSelect2And3PlayersOptions();
         Player3Name.interactable = true;
         Player4Name.interactable = true;
     }
-    
+
     private void UnSelect2And3PlayersOptions()
     {
         PlayWith2Players.isOn = false;
         PlayWith3Players.isOn = false;
     }
-    
+
     private void UnSelect3And4PlayersOptions()
     {
         PlayWith3Players.isOn = false;
         PlayWith4Players.isOn = false;
     }
-    
+
     private void UnSelect2And4PlayersOptions()
     {
         PlayWith2Players.isOn = false;
@@ -192,4 +203,77 @@ public class GameMenuNavigator : MonoBehaviour
     }
 
     #endregion
+
+    private GameParameters GetOfflineGameParameters()
+    {
+        return new GameParameters()
+        {
+            IsOnline = false,
+            Players = GetOfflinePlayerList(),
+            FirstPlayerIndex = 0
+        };
+    }
+
+    private List<LudoPlayerInfo> GetOfflinePlayerList()
+    {
+        if (PlayWith2Players.isOn)
+        {
+            return new List<LudoPlayerInfo>()
+            {
+                new()
+                {
+                    Name = Player1Name.text,
+                },
+                new()
+                {
+                    Name = Player2Name.text,
+                }
+            };
+        }
+        else if (PlayWith3Players.isOn)
+        {
+            return new List<LudoPlayerInfo>()
+                {
+                new()
+                {
+                    Name = Player1Name.text,
+                },
+                new()
+                {
+                    Name = Player2Name.text,
+                },
+                new()
+                {
+                    Name = Player3Name.text,
+                }
+            };
+        }
+        else if (PlayWith4Players.isOn)
+        {
+            return new List<LudoPlayerInfo>()
+                {
+                new()
+                {
+                    Name = Player1Name.text,
+                },
+                new()
+                {
+                    Name = Player2Name.text,
+                },
+                new()
+                {
+                    Name = Player3Name.text,
+                },
+                new()
+                {
+                    Name = Player4Name.text,
+                }
+            };
+        }
+        else
+        {
+            Debug.LogError("No players selected");
+            return new();
+        }
+    }
 }

@@ -20,24 +20,47 @@ public class Dice : NetworkBehaviour
 
     private void OnMouseDown()
     {
-        if (GameManager.CanPlayIfOnline)
+        int diceValue = GetDiceRoll();
+
+        if (GameManager.Instance.GameParameters.IsOnline)
         {
-            Roll_ServerRpc();
+            if (GameManager.CanPlayIfOnline)
+            {
+                Roll_ServerRpc(diceValue);
+            }
+        }
+        else
+        {
+            RollDice(diceValue);
         }
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void Roll_ServerRpc()
+    private void Roll_ServerRpc(int diceValue)
     {
-        Value = Random.Range(1, 7);
-        SendResultToGameManager_ClientRpc(Value);
+        SendResultToGameManager_ClientRpc(diceValue);
     }
 
     [ClientRpc]
     private void SendResultToGameManager_ClientRpc(int value)
     {
+        RollDice(value);
+    }
+
+    private void RollDice(int diceValue)
+    {
+        SetDiceValueAndSprite(diceValue);
+        GameManager.RollDice();
+    }
+
+    private int GetDiceRoll()
+    {
+        return Random.Range(1, 7);
+    }
+
+    private void SetDiceValueAndSprite(int value)
+    {
         Value = value;
         DiceFace.sprite = Sprites[Value - 1];
-        GameManager.RollDice();
     }
 }

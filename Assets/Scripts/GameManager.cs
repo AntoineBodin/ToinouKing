@@ -62,10 +62,17 @@ public class GameManager : NetworkBehaviour
 
     public bool CanPlayIfOnline => !GameParameters.IsOnline || IsMyTurn;
 
-    public LudoPlayerInfo OnlinePlayerIdentity { get; internal set; }// = new();
+    public LudoPlayerInfo OnlinePlayerIdentity { get; internal set; }
 
+    public static GameManager Instance;
 
     #region SETUP
+
+    private void Start()
+    {
+        Instance = this;
+    }
+
     internal void StartGame(GameParameters gameParameters)
     {
         GameParameters = gameParameters;
@@ -132,8 +139,6 @@ public class GameManager : NetworkBehaviour
         player.SpawnSpaces = spawnSpaces[playerIndex];
         player.StartSpace = TokenSpaces[player.PlayerParameter.StartingIndex];
         player.PlayerInfo = GameParameters.Players[playerIndex];
-        player.GameManager = this;
-
         player.SetupLocalBoard();
 
         return player;
@@ -146,7 +151,7 @@ public class GameManager : NetworkBehaviour
         {
             if (!player.IsBlank)
             {
-                player.InstantiateToHome(TokenPrefab, Canvas, playerIndex);
+                player.SpawnTokens(TokenPrefab, Canvas, playerIndex);
             }
             playerIndex++;
         });
@@ -263,30 +268,6 @@ public class GameManager : NetworkBehaviour
 
     private void AutoPlay()
     {
-        /*
-        List<Token> tokensToConsider;
-        if (Dice.Value != 6)
-        {
-            tokensToConsider = CurrentPlayer.Tokens.Where(t => !t.IsInHouse && !t.HasWon).ToList();
-        }
-        else
-        {
-            tokensToConsider = CurrentPlayer.Tokens.Where(t => !t.HasWon).ToList();
-        }
-        tokensToConsider.ForEach(token =>
-        {
-            TokenSpace newPosition = TryGetNewPosition(token);
-            if (newPosition == null)
-            {
-                return;
-            }
-            if (!newPosition.IsSafe && newPosition.IsOccupied && newPosition.TokensByPlayer.ContainsKey(CurrentPlayer)) 
-            {
-                return;
-            }
-            roundInfo.TokensWithNewPosition.Add(token.ID, newPosition);
-        });*/
-
         roundInfo.TokensWithNewPosition.AddRange(CurrentPlayer.GetTokensNewPositions(Dice.Value));
         if (roundInfo.TokensWithNewPosition.Count == 0)
         {
@@ -298,7 +279,7 @@ public class GameManager : NetworkBehaviour
 
         if (roundInfo.TokensWithNewPosition.Count == 1)
         {
-            PlayToken_ClientRPC(roundInfo.TokensWithNewPosition.First().Key);
+            PlayToken(roundInfo.TokensWithNewPosition.First().Key);
         }
     }
 
@@ -308,6 +289,10 @@ public class GameManager : NetworkBehaviour
         if (GameParameters.IsOnline)
         {
             PickToken_ServerRPC(tokenID);
+        }
+        else
+        {
+            PlayToken(tokenID);
         }
     }
 
@@ -319,6 +304,11 @@ public class GameManager : NetworkBehaviour
 
     [ClientRpc]
     public void PlayToken_ClientRPC(int tokenID)
+    {
+        PlayToken(tokenID);
+    }
+
+    private void PlayToken(int tokenID)
     {
         if (gameState != GameState.ChoosingToken)
         {
