@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "test-deploy"
-      
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -20,6 +20,7 @@ jobs:
       with:
         unityVersion: '6000.0.24f1' # Remplace par ta version Unity
         targetPlatform: WebGL
+        license: ${{ secrets.UNITY_LICENSE }}
 
     # 3. Build du jeu WebGL
     - name: Build WebGL game
