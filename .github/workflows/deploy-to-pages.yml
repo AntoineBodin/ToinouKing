@@ -15,8 +15,15 @@ jobs:
         with:
           lfs: true
 
-      # Build
-      - name: Build project
+      # Cache
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
+
+      - name: Set up Unity
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -24,6 +31,11 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: WebGL
+          
+      - name: Build WebGL game
+        run: |
+          mkdir -p Build/WebGL
+          unity-editor -batchmode -quit -executeMethod BuildScript.BuildWebGL
 
       # Output
       - uses: actions/upload-artifact@v3
