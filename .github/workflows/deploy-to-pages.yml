@@ -1,0 +1,35 @@
+name: Deploy WebGL to GitHub Pages
+
+on:
+  push:
+    branches:
+      - "test-deploy"
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout le code source
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Configurer Unity pour le build WebGL
+    - name: Set up Unity
+      uses: game-ci/unity-builder@v2
+      with:
+        unityVersion: '6000.0.24f1' # Remplace par ta version Unity
+        targetPlatform: WebGL
+
+    # 3. Build du jeu WebGL
+    - name: Build WebGL game
+      run: |
+        mkdir -p Build/WebGL
+        unity-editor -batchmode -quit -executeMethod BuildScript.BuildWebGL
+
+    # 4. Déployer sur GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: Build/WebGL
