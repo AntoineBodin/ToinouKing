@@ -20,7 +20,7 @@ jobs:
       with:
         unityVersion: '6000.0.24f1' # Remplace par ta version Unity
         targetPlatform: WebGL
-        license: ${{ secrets.UNITY_LICENSE }}
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
     # 3. Build du jeu WebGL
     - name: Build WebGL game
