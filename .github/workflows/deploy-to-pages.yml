@@ -31,12 +31,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: WebGL
-          
-      - name: Build WebGL game
-        run: |
-          mkdir -p Build/WebGL
-          unity-editor -batchmode -quit -executeMethod BuildScript.BuildWebGL
-
+    
       # Output
       - uses: actions/upload-artifact@v3
         with:
