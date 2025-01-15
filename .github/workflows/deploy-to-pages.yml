@@ -35,11 +35,11 @@ jobs:
       # Output
       - uses: actions/upload-artifact@v3
         with:
-          name: Build
-          path: Build/WebGL
+          name: WebGL
+          path: build/WebGL
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: Build/WebGL
+          publish_dir: build/WebGL
