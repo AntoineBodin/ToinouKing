@@ -40,7 +40,7 @@ public class LudoPlayer : MonoBehaviour
     {
         newToken.transform.SetParent(canvas.transform);
         newToken.transform.position = space.transform.position;
-        newToken.transform.localScale = new Vector3(4, 4, 4);
+        newToken.transform.localScale = new Vector3(1, 1, 1);
 
         Token token = newToken.GetComponent<Token>();
 

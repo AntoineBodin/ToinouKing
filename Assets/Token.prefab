@@ -27,7 +27,7 @@ RectTransform:
   m_GameObject: {fileID: 3151082110463866668}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 32, y: 32, z: 32}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2303599371283866258}
@@ -155,7 +155,6 @@ MonoBehaviour:
   IsInHouse: 1
   IdleAnimator: {fileID: 7598195875192195339}
   Collider: {fileID: 5000865105542420770}
-  GameManager: {fileID: 0}
   HasWon: 0
 --- !u!61 &5000865105542420770
 BoxCollider2D:
@@ -201,7 +200,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 10.005905, y: 13.021101}
+  m_Size: {x: 14.506134, y: 14.608764}
   m_EdgeRadius: 0
 --- !u!95 &7598195875192195339
 Animator:
