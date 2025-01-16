@@ -2,8 +2,8 @@ name: Deploy WebGL to GitHub Pages
 
 on:
   push:
-    tags:
-      - 'v**'
+    branches:
+      - "release/**"
 jobs:
   build:
     name: Build my project ✨
