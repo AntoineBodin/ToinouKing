@@ -199,4 +199,7 @@ public class LudoPlayer : MonoBehaviour
 
         return LocalBoard[newPositionIndex];
     }
+
+
+
 }
