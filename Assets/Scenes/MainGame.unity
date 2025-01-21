@@ -1145,6 +1145,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 331166424}
   PlayerAvatar: {fileID: 882413808}
+  PlayerScore: {fileID: 0}
 --- !u!1 &87814842
 GameObject:
   m_ObjectHideFlags: 0
@@ -4008,6 +4009,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 1282742989}
   PlayerAvatar: {fileID: 1748208002}
+  PlayerScore: {fileID: 1259465697}
 --- !u!1 &276694157
 GameObject:
   m_ObjectHideFlags: 0
@@ -5433,6 +5435,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 480917141}
   PlayerAvatar: {fileID: 1727761492}
+  PlayerScore: {fileID: 0}
 --- !u!1 &379304633
 GameObject:
   m_ObjectHideFlags: 0
@@ -5485,6 +5488,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 114548034}
   PlayerAvatar: {fileID: 831492553}
+  PlayerScore: {fileID: 0}
 --- !u!1 &387815529
 GameObject:
   m_ObjectHideFlags: 0
@@ -10111,6 +10115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 679231154}
   PlayerAvatar: {fileID: 2055868794}
+  PlayerScore: {fileID: 940044843}
 --- !u!1 &721189430
 GameObject:
   m_ObjectHideFlags: 0
@@ -16722,6 +16727,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 232086271}
   PlayerAvatar: {fileID: 359968732}
+  PlayerScore: {fileID: 0}
 --- !u!1 &1493070402
 GameObject:
   m_ObjectHideFlags: 0
@@ -18537,6 +18543,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 643669029}
   PlayerAvatar: {fileID: 1868424557}
+  PlayerScore: {fileID: 308420671}
 --- !u!1 &1676726910
 GameObject:
   m_ObjectHideFlags: 0
@@ -19642,6 +19649,7 @@ MonoBehaviour:
   - {fileID: 916045212}
   - {fileID: 1652728430}
   - {fileID: 566906622}
+  Player1UI: {fileID: 1673535931}
   Player1Name: {fileID: 643669029}
   HomeSpacesPlayer1:
   - {fileID: 448203633}
@@ -19649,6 +19657,7 @@ MonoBehaviour:
   - {fileID: 162100731}
   - {fileID: 1058874555}
   Player1Parameters: {fileID: 11400000, guid: 991fcacf424fad849bb9114e1cca82b3, type: 2}
+  Player2UI: {fileID: 2089624418}
   Player2Name: {fileID: 312968376}
   HomeSpacesPlayer2:
   - {fileID: 427804149}
@@ -19656,6 +19665,7 @@ MonoBehaviour:
   - {fileID: 910487813}
   - {fileID: 529504110}
   Player2Parameters: {fileID: 11400000, guid: 03594f6731f9b4943b1f1affd844b715, type: 2}
+  Player3UI: {fileID: 273920519}
   Player3Name: {fileID: 1282742989}
   HomeSpacesPlayer3:
   - {fileID: 321772090}
@@ -19663,6 +19673,7 @@ MonoBehaviour:
   - {fileID: 1587478434}
   - {fileID: 228598235}
   Player3Parameters: {fileID: 11400000, guid: 0b97904875e45cf43ba3d818663fed48, type: 2}
+  Player4UI: {fileID: 716751200}
   Player4Name: {fileID: 679231154}
   HomeSpacesPlayer4:
   - {fileID: 1204373523}
@@ -23497,6 +23508,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 312968376}
   PlayerAvatar: {fileID: 575442052}
+  PlayerScore: {fileID: 1742453173}
 --- !u!1 &2094437273
 GameObject:
   m_ObjectHideFlags: 0
