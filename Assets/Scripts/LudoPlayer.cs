@@ -16,6 +16,7 @@ public class LudoPlayer : MonoBehaviour
     public List<Token> Tokens;
     public PlayerParameter PlayerParameter;
     public LudoPlayerInfo PlayerInfo;
+    private PlayerUI playerUI;
     public TokenSpace StartSpace { get; internal set; }
     public bool IsBlank = false;
 
@@ -198,5 +199,11 @@ public class LudoPlayer : MonoBehaviour
         }
 
         return LocalBoard[newPositionIndex];
+    }
+
+    internal void Score()
+    {
+        PlayerInfo.Score++;
+        playerUI.UpdateScore();
     }
 }

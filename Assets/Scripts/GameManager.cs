@@ -31,21 +31,25 @@ public class GameManager : NetworkBehaviour
     public List<TokenSpace> TokenSpaces;
 
     [Header("Player 1")]
+    public PlayerUI Player1UI;
     public TMP_Text Player1Name;
     public List<TokenSpace> HomeSpacesPlayer1;
     public PlayerParameter Player1Parameters;
 
     [Header("Player 2")]
+    public PlayerUI Player2UI;
     public TMP_Text Player2Name;
     public List<TokenSpace> HomeSpacesPlayer2;
     public PlayerParameter Player2Parameters;
 
     [Header("Player 3")]
+    public PlayerUI Player3UI;
     public TMP_Text Player3Name;
     public List<TokenSpace> HomeSpacesPlayer3;
     public PlayerParameter Player3Parameters;
 
     [Header("Player 4")]
+    public PlayerUI Player4UI;
     public TMP_Text Player4Name;
     public List<TokenSpace> HomeSpacesPlayer4;
     public PlayerParameter Player4Parameters;
@@ -322,6 +326,7 @@ public class GameManager : NetworkBehaviour
         if (newPosition.Index == CurrentPlayer.PlayerParameter.WinningSpaceIndex)
         {
             roundInfo.EnterAToken();
+            CurrentPlayer.Score();
         }
 
         if (!newPosition.IsSafe)
