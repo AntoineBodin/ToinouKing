@@ -3,8 +3,10 @@ using Assets.Scripts.DataStructures;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.Netcode;
+using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
@@ -31,34 +33,39 @@ public class GameManager : NetworkBehaviour
     public List<TokenSpace> TokenSpaces;
 
     [Header("Player 1")]
+    public PlayerUI Player1UI;
     public TMP_Text Player1Name;
     public List<TokenSpace> HomeSpacesPlayer1;
     public PlayerParameter Player1Parameters;
 
     [Header("Player 2")]
+    public PlayerUI Player2UI;
     public TMP_Text Player2Name;
     public List<TokenSpace> HomeSpacesPlayer2;
     public PlayerParameter Player2Parameters;
 
     [Header("Player 3")]
+    public PlayerUI Player3UI;
     public TMP_Text Player3Name;
     public List<TokenSpace> HomeSpacesPlayer3;
     public PlayerParameter Player3Parameters;
 
     [Header("Player 4")]
+    public PlayerUI Player4UI;
     public TMP_Text Player4Name;
     public List<TokenSpace> HomeSpacesPlayer4;
     public PlayerParameter Player4Parameters;
 
     private List<List<TokenSpace>> spawnSpaces = new();
-    private List<TMP_Text> playerTexts = new();
+    //private List<TMP_Text> playerTexts = new();
     private List<PlayerParameter> playerParameters = new();
+    private List<PlayerUI> playerUIs = new();
 
     private RoundInfo roundInfo = new();
 
     public List<LudoPlayer> Players = new();
 
-    public bool IsMyTurn => OnlinePlayerIdentity.ID == CurrentPlayer.PlayerInfo.ID;
+    public bool IsMyTurn => OnlinePlayerIdentity.ID == CurrentPlayer.ID;
 
     public bool CanPlayIfOnline => !GameParameters.IsOnline || IsMyTurn;
 
@@ -122,24 +129,21 @@ public class GameManager : NetworkBehaviour
                 playerInfo.AvatarID = GameParameters.DefaultAvatarID;
             }
 
-            playerTexts[playerIndex].text = playerInfo.Name.ToString();
-
-            LudoPlayer player = CreatePlayer(playerIndex);
-            player.PlayerInfo = playerInfo;
+            LudoPlayer player = CreatePlayer(playerIndex, playerInfo);
             Players.Add(player);
             playerIndex++;
         });
     }
 
-    private LudoPlayer CreatePlayer(int playerIndex)
+    private LudoPlayer CreatePlayer(int playerIndex, LudoPlayerInfo playerInfo)
     {
         var playerObject = Instantiate(PlayerPrefab);
         LudoPlayer player = playerObject.GetComponent<LudoPlayer>();
-        player.PlayerParameter = playerParameters[playerIndex];
-        player.SpawnSpaces = spawnSpaces[playerIndex];
-        player.StartSpace = TokenSpaces[player.PlayerParameter.StartingIndex];
-        player.PlayerInfo = GameParameters.Players[playerIndex];
+
+        player.Setup(playerInfo, playerUIs[playerIndex], playerParameters[playerIndex], spawnSpaces[playerIndex]);
+        
         player.SetupLocalBoard();
+        player.UpdateUI();
 
         return player;
     }
@@ -319,9 +323,10 @@ public class GameManager : NetworkBehaviour
 
         TokenSpace newPosition = roundInfo.TokensWithNewPosition[tokenID];
 
-        if (newPosition.Index == CurrentPlayer.PlayerParameter.WinningSpaceIndex)
+        if (CurrentPlayer.IsWinningIndex(newPosition.Index))// == CurrentPlayer.PlayerParameter.WinningSpaceIndex)
         {
             roundInfo.EnterAToken();
+            CurrentPlayer.Score();
         }
 
         if (!newPosition.IsSafe)
@@ -396,33 +401,10 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    internal TokenSpace TryGetNewPosition(Token token)
-    {
-        if (token.IsInHouse)
-        {
-            if (Dice.Value == 6)
-            {
-                return token.player.StartSpace;
-            }
-            return null;
-        }
-
-        int newPositionIndex = token.currentPosition.Index + Dice.Value;
-
-        newPositionIndex = token.GetNewPosition(newPositionIndex);
-
-        if (newPositionIndex == -1)
-        {
-            return null;
-        }
-
-        return TokenSpaces[newPositionIndex];
-    }
-
     private void UpdateCurrentPlayer()
     {
         CurrentPlayer = Players[currentPlayerIndex];
-        CurrentPlayerText.text = CurrentPlayer.PlayerInfo.Name.ToString();
+        CurrentPlayerText.text = CurrentPlayer.Name.ToString();
         CurrentPlayerText.color = playerParameters[currentPlayerIndex].TokenColor;
     }
 
@@ -437,11 +419,16 @@ public class GameManager : NetworkBehaviour
         playerParameters.Add(Player2Parameters);
         playerParameters.Add(Player3Parameters);
         playerParameters.Add(Player4Parameters);
-
+/*
         playerTexts.Add(Player1Name);
         playerTexts.Add(Player2Name);
         playerTexts.Add(Player3Name);
-        playerTexts.Add(Player4Name);
+        playerTexts.Add(Player4Name);*/
+
+        playerUIs.Add(Player1UI);
+        playerUIs.Add(Player2UI);
+        playerUIs.Add(Player3UI);
+        playerUIs.Add(Player4UI);
     }
 
     private void SetupListsFor2Players()
@@ -451,8 +438,11 @@ public class GameManager : NetworkBehaviour
 
         playerParameters.Add(Player1Parameters);
         playerParameters.Add(Player3Parameters);
-
+/*
         playerTexts.Add(Player1Name);
-        playerTexts.Add(Player3Name);
+        playerTexts.Add(Player3Name);*/
+
+        playerUIs.Add(Player1UI);
+        playerUIs.Add(Player3UI);
     }
 }
