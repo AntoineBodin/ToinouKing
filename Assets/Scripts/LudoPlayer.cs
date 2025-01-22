@@ -19,17 +19,20 @@ public class LudoPlayer : MonoBehaviour
     private PlayerUI playerUI;
     private TokenSpace startSpace;
     public bool IsBlank = false;
+    private bool hasWon = false;
+    public bool CanPlay => !IsBlank && !hasWon;
 
     public FixedString64Bytes ID => playerInfo.ID;
     public FixedString64Bytes Name => playerInfo.Name;
     public bool IsWinningIndex(int index)
         => playerParameter.WinningSpaceIndex == index;
 
-    public void SpawnTokens(GameObject tokenPrefab, GameObject canvas, int playerIndex)
+    public void SpawnTokens(GameObject tokenPrefab, GameObject canvas, int playerIndex, int tokenCount)
     {
-        int tokenIndex = 0;
-        spawnSpaces.ForEach(space =>
+        for (int tokenIndex = 0; tokenIndex  < tokenCount; tokenIndex++) 
         {
+            TokenSpace space = FindAvailableSpawnSpace();
+
             GameObject newToken = Instantiate(tokenPrefab);
            
             Token token = SetupToken(newToken, space, canvas, playerIndex * 4 + tokenIndex);
@@ -37,9 +40,7 @@ public class LudoPlayer : MonoBehaviour
             GameManager.Instance.AddToken(token);
 
             MoveToken(token, space, true);
-
-            tokenIndex++;
-        });
+        }
     }
 
     private Token SetupToken(GameObject newToken, TokenSpace space, GameObject canvas, int id)
@@ -141,9 +142,14 @@ public class LudoPlayer : MonoBehaviour
     internal void MoveTokenToHouse(Token eatenToken)
     {
         TokenSpace currentTokenSpace = eatenToken.currentPosition;
-        var availableSpawnSpace = spawnSpaces.FirstOrDefault(spawnSpace => !spawnSpace.IsOccupied);
+        TokenSpace availableSpawnSpace = FindAvailableSpawnSpace();
         MoveToken(eatenToken, availableSpawnSpace, true);
         eatenToken.IsInHouse = true;
+    }
+
+    private TokenSpace FindAvailableSpawnSpace()
+    {
+        return spawnSpaces.FirstOrDefault(spawnSpace => !spawnSpace.IsOccupied);
     }
 
     public void SetupLocalBoard()
@@ -207,6 +213,11 @@ public class LudoPlayer : MonoBehaviour
         return localBoard[newPositionIndex];
     }
 
+    public IEnumerable<Token> GetPlayableTokens()
+    {
+        return tokens.Where(t => !t.HasWon);
+    }
+
     internal void Score()
     {
         playerInfo.Score++;
@@ -228,4 +239,8 @@ public class LudoPlayer : MonoBehaviour
         tokens = new List<Token>();
     }
 
+    public void Win()
+    {
+        hasWon = true;
+    }
 }
