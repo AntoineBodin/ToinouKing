@@ -9,4 +9,5 @@ public class GameParameters : ScriptableObject
     public int FirstPlayerIndex;
     public int DefaultAvatarID = 0;
     public bool IsOnline = false;
+    public int tokenCount = 2;
 }
