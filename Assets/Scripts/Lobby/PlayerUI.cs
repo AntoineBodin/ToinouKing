@@ -28,12 +28,11 @@ public class PlayerUI : MonoBehaviour
         gameObject.SetActive(true);
         PlayerName.text = PlayerInfo.Name.ToString();
         PlayerAvatar.sprite = AvatarIDToImage.Instance.GetAvatarByID(PlayerInfo.AvatarID);
-        UpdateScore();
     }
 
-    public void UpdateScore()
+    public void UpdateScore(int score)
     {
-        PlayerScore.text = PlayerInfo.Score.ToString();
+        PlayerScore.text = score.ToString();
     }
 
     internal void Clear()
