@@ -7,6 +7,7 @@
         AutoPlay,
         ChoosingToken,
         EndRound,
-        NextRound
+        NextRound,
+        EndGame
     }
 }
