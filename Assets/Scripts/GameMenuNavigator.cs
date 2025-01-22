@@ -211,7 +211,7 @@ public class GameMenuNavigator : MonoBehaviour
         {
             IsOnline = false,
             Players = GetOfflinePlayerList(),
-            FirstPlayerIndex = 0,
+            FirstPlayerIndex = 0
         };
     }
 

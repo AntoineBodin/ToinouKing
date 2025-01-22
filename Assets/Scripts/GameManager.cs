@@ -31,35 +31,34 @@ public class GameManager : NetworkBehaviour
     public List<TokenSpace> TokenSpaces;
 
     [Header("Player 1")]
-    public PlayerUI Player1UI;
+    public TMP_Text Player1Name;
     public List<TokenSpace> HomeSpacesPlayer1;
     public PlayerParameter Player1Parameters;
 
     [Header("Player 2")]
-    public PlayerUI Player2UI;
+    public TMP_Text Player2Name;
     public List<TokenSpace> HomeSpacesPlayer2;
     public PlayerParameter Player2Parameters;
 
     [Header("Player 3")]
-    public PlayerUI Player3UI;
+    public TMP_Text Player3Name;
     public List<TokenSpace> HomeSpacesPlayer3;
     public PlayerParameter Player3Parameters;
 
     [Header("Player 4")]
-    public PlayerUI Player4UI;
+    public TMP_Text Player4Name;
     public List<TokenSpace> HomeSpacesPlayer4;
     public PlayerParameter Player4Parameters;
 
     private List<List<TokenSpace>> spawnSpaces = new();
+    private List<TMP_Text> playerTexts = new();
     private List<PlayerParameter> playerParameters = new();
-    private List<PlayerUI> playerUIs = new();
 
     private RoundInfo roundInfo = new();
 
-    public List<LudoPlayer> PlayingPlayers => Players.Where(p => p.CanPlay).ToList();
     public List<LudoPlayer> Players = new();
 
-    public bool IsMyTurn => OnlinePlayerIdentity.ID == CurrentPlayer.ID;
+    public bool IsMyTurn => OnlinePlayerIdentity.ID == CurrentPlayer.PlayerInfo.ID;
 
     public bool CanPlayIfOnline => !GameParameters.IsOnline || IsMyTurn;
 
@@ -123,21 +122,24 @@ public class GameManager : NetworkBehaviour
                 playerInfo.AvatarID = GameParameters.DefaultAvatarID;
             }
 
-            LudoPlayer player = CreatePlayer(playerIndex, playerInfo);
+            playerTexts[playerIndex].text = playerInfo.Name.ToString();
+
+            LudoPlayer player = CreatePlayer(playerIndex);
+            player.PlayerInfo = playerInfo;
             Players.Add(player);
             playerIndex++;
         });
     }
 
-    private LudoPlayer CreatePlayer(int playerIndex, LudoPlayerInfo playerInfo)
+    private LudoPlayer CreatePlayer(int playerIndex)
     {
         var playerObject = Instantiate(PlayerPrefab);
         LudoPlayer player = playerObject.GetComponent<LudoPlayer>();
-
-        player.Setup(playerInfo, playerUIs[playerIndex], playerParameters[playerIndex], spawnSpaces[playerIndex]);
-        
+        player.PlayerParameter = playerParameters[playerIndex];
+        player.SpawnSpaces = spawnSpaces[playerIndex];
+        player.StartSpace = TokenSpaces[player.PlayerParameter.StartingIndex];
+        player.PlayerInfo = GameParameters.Players[playerIndex];
         player.SetupLocalBoard();
-        player.UpdateUI();
 
         return player;
     }
@@ -149,7 +151,7 @@ public class GameManager : NetworkBehaviour
         {
             if (!player.IsBlank)
             {
-                player.SpawnTokens(TokenPrefab, Canvas, playerIndex, GameParameters.tokenCount);
+                player.SpawnTokens(TokenPrefab, Canvas, playerIndex);
             }
             playerIndex++;
         });
@@ -262,12 +264,6 @@ public class GameManager : NetworkBehaviour
         NextRound();
     }
 
-    private void SwitchToEndGame()
-    {
-        Debug.Log("Switch to state END_GAME");
-        gameState = GameState.EndGame;
-    }
-
     #endregion
 
     private void AutoPlay()
@@ -323,10 +319,9 @@ public class GameManager : NetworkBehaviour
 
         TokenSpace newPosition = roundInfo.TokensWithNewPosition[tokenID];
 
-        if (CurrentPlayer.IsWinningIndex(newPosition.Index))
+        if (newPosition.Index == CurrentPlayer.PlayerParameter.WinningSpaceIndex)
         {
             roundInfo.EnterAToken();
-            CurrentPlayer.Score();
         }
 
         if (!newPosition.IsSafe)
@@ -340,27 +335,9 @@ public class GameManager : NetworkBehaviour
 
             EatToken(tokenToEat);
         }
-         CurrentPlayer.MoveToken(tokens.Find(t => t.ID == tokenID), newPosition, true);
+        CurrentPlayer.MoveToken(tokens[tokenID], newPosition, true);
 
-        if (CurrentPlayer.GetPlayableTokens().Count() == 0)
-        {
-            PlayerWins();
-        }
-
-        if (gameState != GameState.EndGame)
-        {
-            SwitchToStateEndRound();
-        }
-    }
-
-    private void PlayerWins()
-    {
-        roundInfo.PlayerWon();
-        CurrentPlayer.Win();
-        if (PlayingPlayers.Count == 1)
-        {
-            SwitchToEndGame();
-        }
+        SwitchToStateEndRound();
     }
 
     private void EatToken(Token tokenToEat)
@@ -376,7 +353,7 @@ public class GameManager : NetworkBehaviour
     public void EndRound()
     {
         // Play again
-        if (!roundInfo.PlayerHasWon && (Dice.Value == 6 || roundInfo.HasEaten || roundInfo.HasEnteredAToken))
+        if (Dice.Value == 6 || roundInfo.HasEaten || roundInfo.HasEnteredAToken)
         {
             Debug.Log("Playing Again");
             SwitchToStateStartRound();
@@ -393,7 +370,7 @@ public class GameManager : NetworkBehaviour
     private void NextRound()
     {
         currentPlayerIndex++;
-        currentPlayerIndex %= PlayingPlayers.Count;
+        currentPlayerIndex %= GameParameters.Players.Count;
 
         UpdateCurrentPlayer();
 
@@ -415,14 +392,37 @@ public class GameManager : NetworkBehaviour
     {
         foreach (var playableTokenID in roundInfo.TokensWithNewPosition.Keys)
         {
-            tokens.Find(t => t.ID == playableTokenID).UpdateIdling(isIdling);
+            tokens[playableTokenID].UpdateIdling(isIdling);
         }
+    }
+
+    internal TokenSpace TryGetNewPosition(Token token)
+    {
+        if (token.IsInHouse)
+        {
+            if (Dice.Value == 6)
+            {
+                return token.player.StartSpace;
+            }
+            return null;
+        }
+
+        int newPositionIndex = token.currentPosition.Index + Dice.Value;
+
+        newPositionIndex = token.GetNewPosition(newPositionIndex);
+
+        if (newPositionIndex == -1)
+        {
+            return null;
+        }
+
+        return TokenSpaces[newPositionIndex];
     }
 
     private void UpdateCurrentPlayer()
     {
-        CurrentPlayer = PlayingPlayers[currentPlayerIndex];
-        CurrentPlayerText.text = CurrentPlayer.Name.ToString();
+        CurrentPlayer = Players[currentPlayerIndex];
+        CurrentPlayerText.text = CurrentPlayer.PlayerInfo.Name.ToString();
         CurrentPlayerText.color = playerParameters[currentPlayerIndex].TokenColor;
     }
 
@@ -437,16 +437,11 @@ public class GameManager : NetworkBehaviour
         playerParameters.Add(Player2Parameters);
         playerParameters.Add(Player3Parameters);
         playerParameters.Add(Player4Parameters);
-/*
+
         playerTexts.Add(Player1Name);
         playerTexts.Add(Player2Name);
         playerTexts.Add(Player3Name);
-        playerTexts.Add(Player4Name);*/
-
-        playerUIs.Add(Player1UI);
-        playerUIs.Add(Player2UI);
-        playerUIs.Add(Player3UI);
-        playerUIs.Add(Player4UI);
+        playerTexts.Add(Player4Name);
     }
 
     private void SetupListsFor2Players()
@@ -456,11 +451,8 @@ public class GameManager : NetworkBehaviour
 
         playerParameters.Add(Player1Parameters);
         playerParameters.Add(Player3Parameters);
-/*
-        playerTexts.Add(Player1Name);
-        playerTexts.Add(Player3Name);*/
 
-        playerUIs.Add(Player1UI);
-        playerUIs.Add(Player3UI);
+        playerTexts.Add(Player1Name);
+        playerTexts.Add(Player3Name);
     }
 }
