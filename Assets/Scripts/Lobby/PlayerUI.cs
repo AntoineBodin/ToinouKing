@@ -14,6 +14,9 @@ public class PlayerUI : MonoBehaviour
 
     [SerializeField]
     private TMP_Text PlayerScore;
+    
+    [SerializeField]
+    private TMP_Text Ranking;
 
     private LudoPlayerInfo PlayerInfo;
 
@@ -33,6 +36,11 @@ public class PlayerUI : MonoBehaviour
     public void UpdateScore(int score)
     {
         PlayerScore.text = score.ToString();
+    }
+
+    public void SetRank(int rank)
+    {
+        PlayerScore.text = rank.ToString();
     }
 
     internal void Clear()
