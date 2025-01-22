@@ -8,9 +8,12 @@ public class PlayerUI : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text PlayerName;
-    
+
     [SerializeField]
     private Image PlayerAvatar;
+
+    [SerializeField]
+    private TMP_Text PlayerScore;
 
     private LudoPlayerInfo PlayerInfo;
 
@@ -25,6 +28,11 @@ public class PlayerUI : MonoBehaviour
         gameObject.SetActive(true);
         PlayerName.text = PlayerInfo.Name.ToString();
         PlayerAvatar.sprite = AvatarIDToImage.Instance.GetAvatarByID(PlayerInfo.AvatarID);
+    }
+
+    public void UpdateScore(int score)
+    {
+        PlayerScore.text = score.ToString();
     }
 
     internal void Clear()
