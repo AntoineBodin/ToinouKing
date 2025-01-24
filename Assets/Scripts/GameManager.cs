@@ -1,6 +1,8 @@
 using Assets.Scripts;
 using Assets.Scripts.DataStructures;
+using Assets.Scripts.UI;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -22,6 +24,7 @@ public class GameManager : NetworkBehaviour
 
     private int playerCount = 0;
     private int currentPlayerIndex = 0;
+    private int winningPlayerIndex = 1;
 
     public LudoPlayer CurrentPlayer { get; private set; }
 
@@ -31,28 +34,28 @@ public class GameManager : NetworkBehaviour
     public List<TokenSpace> TokenSpaces;
 
     [Header("Player 1")]
-    public PlayerUI Player1UI;
+    public PlayerUIWithScore Player1UI;
     public List<TokenSpace> HomeSpacesPlayer1;
     public PlayerParameter Player1Parameters;
 
     [Header("Player 2")]
-    public PlayerUI Player2UI;
+    public PlayerUIWithScore Player2UI;
     public List<TokenSpace> HomeSpacesPlayer2;
     public PlayerParameter Player2Parameters;
 
     [Header("Player 3")]
-    public PlayerUI Player3UI;
+    public PlayerUIWithScore Player3UI;
     public List<TokenSpace> HomeSpacesPlayer3;
     public PlayerParameter Player3Parameters;
 
     [Header("Player 4")]
-    public PlayerUI Player4UI;
+    public PlayerUIWithScore Player4UI;
     public List<TokenSpace> HomeSpacesPlayer4;
     public PlayerParameter Player4Parameters;
 
     private List<List<TokenSpace>> spawnSpaces = new();
     private List<PlayerParameter> playerParameters = new();
-    private List<PlayerUI> playerUIs = new();
+    private List<SimplePlayerUI> playerUIs = new();
 
     private RoundInfo roundInfo = new();
 
@@ -137,7 +140,6 @@ public class GameManager : NetworkBehaviour
         player.Setup(playerInfo, playerUIs[playerIndex], playerParameters[playerIndex], spawnSpaces[playerIndex]);
         
         player.SetupLocalBoard();
-        player.UpdateUI();
 
         return player;
     }
@@ -162,6 +164,19 @@ public class GameManager : NetworkBehaviour
 
     #endregion
 
+    private void ResetGame()
+    {
+        tokens.ForEach(t => Destroy(t.gameObject));
+        tokens.Clear();
+        Players.Clear();
+        playerUIs.Clear();
+        playerParameters.Clear();
+        spawnSpaces.Clear();
+        playerCount = 0;
+        currentPlayerIndex = 0;
+        winningPlayerIndex = 1;
+        roundInfo.Reset();
+    }
     private void Update()
     {
         switch (gameState)
@@ -266,7 +281,10 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("Switch to state END_GAME");
         gameState = GameState.EndGame;
+
+        EndGame();
     }
+
 
     #endregion
 
@@ -323,12 +341,6 @@ public class GameManager : NetworkBehaviour
 
         TokenSpace newPosition = roundInfo.TokensWithNewPosition[tokenID];
 
-        if (CurrentPlayer.IsWinningIndex(newPosition.Index))
-        {
-            roundInfo.EnterAToken();
-            CurrentPlayer.Score();
-        }
-
         if (!newPosition.IsSafe)
         {
             Token tokenToEat = null;
@@ -340,7 +352,13 @@ public class GameManager : NetworkBehaviour
 
             EatToken(tokenToEat);
         }
-         CurrentPlayer.MoveToken(tokens.Find(t => t.ID == tokenID), newPosition, true);
+        CurrentPlayer.MoveToken(tokens.Find(t => t.ID == tokenID), newPosition, true);
+
+        if (CurrentPlayer.IsWinningIndex(newPosition.Index))
+        {
+            roundInfo.EnterAToken();
+            CurrentPlayer.Score();
+        }
 
         if (CurrentPlayer.GetPlayableTokens().Count() == 0)
         {
@@ -356,7 +374,8 @@ public class GameManager : NetworkBehaviour
     private void PlayerWins()
     {
         roundInfo.PlayerWon();
-        CurrentPlayer.Win();
+        CurrentPlayer.Win(winningPlayerIndex);
+        winningPlayerIndex++;
         if (PlayingPlayers.Count == 1)
         {
             SwitchToEndGame();
@@ -462,5 +481,14 @@ public class GameManager : NetworkBehaviour
 
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player3UI);
+    }
+    
+    private void EndGame()
+    {
+        Players.Find(t => t.CanPlay).Win(winningPlayerIndex);
+        GameMenuNavigator.Instance.DisplayEndGamePanel();
+        EndGameUIManager.Instance.SetPlayers(Players);
+        EndGameUIManager.Instance.SetOnline(GameParameters.IsOnline);
+        ResetGame();
     }
 }

@@ -15,15 +15,15 @@ public class LudoPlayer : MonoBehaviour
     private List<TokenSpace> localBoard;
     private List<Token> tokens;
     private PlayerParameter playerParameter;
-    private LudoPlayerInfo playerInfo;
-    private PlayerUI playerUI;
+    public LudoPlayerInfo PlayerInfo;
+    private SimplePlayerUI inGamePlayerUI;
     private TokenSpace startSpace;
     public bool IsBlank = false;
     private bool hasWon = false;
     public bool CanPlay => !IsBlank && !hasWon;
-
-    public FixedString64Bytes ID => playerInfo.ID;
-    public FixedString64Bytes Name => playerInfo.Name;
+    public int Rank => PlayerInfo.Rank;
+    public FixedString64Bytes ID => PlayerInfo.ID;
+    public FixedString64Bytes Name => PlayerInfo.Name;
     public bool IsWinningIndex(int index)
         => playerParameter.WinningSpaceIndex == index;
 
@@ -220,27 +220,34 @@ public class LudoPlayer : MonoBehaviour
 
     internal void Score()
     {
-        playerInfo.Score++;
-        playerUI.UpdateScore(playerInfo.Score);
+        var localPlayerInfo = PlayerInfo;
+        localPlayerInfo.Score++;
+        PlayerInfo = localPlayerInfo;
+        inGamePlayerUI.SetPlayerInfo(PlayerInfo);
+        UpdateUI();
     }
 
-    public void UpdateUI()
+    private void UpdateUI()
     {
-        playerUI.UpdateUI();
+        inGamePlayerUI.UpdateUI();
     }
 
-    internal void Setup(LudoPlayerInfo playerInfo, PlayerUI playerUI, PlayerParameter playerParameter, List<TokenSpace> spawnSpaces)
+    internal void Setup(LudoPlayerInfo playerInfo, SimplePlayerUI playerUI, PlayerParameter playerParameter, List<TokenSpace> spawnSpaces)
     {
-        this.playerInfo = playerInfo;
-        this.playerUI = playerUI;
-        this.playerUI.SetPlayerInfo(playerInfo);
+        this.PlayerInfo = playerInfo;
+        inGamePlayerUI = playerUI;
+        inGamePlayerUI.SetPlayerInfo(playerInfo);
         this.playerParameter = playerParameter;
         this.spawnSpaces = spawnSpaces;
         tokens = new List<Token>();
+        UpdateUI();
     }
 
-    public void Win()
+    public void Win(int rank)
     {
         hasWon = true;
+        var localPlayerInfo = PlayerInfo;
+        localPlayerInfo.Rank = rank;
+        PlayerInfo = localPlayerInfo;
     }
 }

@@ -22,6 +22,8 @@ public class Dice : NetworkBehaviour
     {
         int diceValue = GetDiceRoll();
 
+        Debug.Log("Dice value: " + diceValue);
+
         if (GameManager.Instance.GameParameters.IsOnline)
         {
             if (GameManager.CanPlayIfOnline)

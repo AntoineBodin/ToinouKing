@@ -12,6 +12,7 @@ namespace Assets.Scripts
         public FixedString32Bytes Name;
         public int AvatarID;
         public int Score;
+        public int Rank;
 
         private const string k_playerID = "PlayerID";
         private const string k_playerName = "PlayerName";
@@ -23,6 +24,7 @@ namespace Assets.Scripts
             Name = player.Data[k_playerName].Value;
             AvatarID = int.Parse(player.Data[k_playerAvatarID].Value);
             Score = 0;
+            Rank = 0;
         }
 
         public static LudoPlayerInfo nullInstance = new()
@@ -32,6 +34,7 @@ namespace Assets.Scripts
             AvatarID = -1,
             Score = 0,
         };
+
 
         public bool Equals(LudoPlayerInfo other)
         {

@@ -221,7 +221,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1367279}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 560620703}
@@ -1143,10 +1143,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 331166424}
-  PlayerAvatar: {fileID: 882413808}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 331166424}
+  PlayerAvatarImage: {fileID: 882413808}
 --- !u!1 &87814842
 GameObject:
   m_ObjectHideFlags: 0
@@ -1776,7 +1774,7 @@ RectTransform:
   - {fileID: 2029553964}
   m_Father: {fileID: 511772319}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.1, y: 0.3}
+  m_AnchorMin: {x: 0.1, y: 0.4}
   m_AnchorMax: {x: 0.9, y: 0.8}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
@@ -3076,7 +3074,7 @@ GameObject:
   - component: {fileID: 222036677}
   - component: {fileID: 222036676}
   m_Layer: 5
-  m_Name: PlayBtn
+  m_Name: PlayAgainBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4240,13 +4238,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 273920517}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f9ee383e9573324e9773de42a429d42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 1282742989}
-  PlayerAvatar: {fileID: 1748208002}
-  PlayerScore: {fileID: 1259465697}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 1282742989}
+  PlayerAvatarImage: {fileID: 1748208002}
+  PlayerScoreText: {fileID: 1259465697}
 --- !u!1 &276694157
 GameObject:
   m_ObjectHideFlags: 0
@@ -4512,7 +4509,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.85
+  m_fontSize: 27.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5915,7 +5912,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.85
+  m_fontSize: 27.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6017,10 +6014,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 480917141}
-  PlayerAvatar: {fileID: 1727761492}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 480917141}
+  PlayerAvatarImage: {fileID: 1727761492}
 --- !u!1 &379304633
 GameObject:
   m_ObjectHideFlags: 0
@@ -6071,10 +6066,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 114548034}
-  PlayerAvatar: {fileID: 831492553}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 114548034}
+  PlayerAvatarImage: {fileID: 831492553}
 --- !u!1 &387815529
 GameObject:
   m_ObjectHideFlags: 0
@@ -7550,13 +7543,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 502286444}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: c1e323bc2c0d1cb498f1207157e30996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 528450948}
-  PlayerAvatar: {fileID: 1975361750}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 871180543}
+  PlayerNameText: {fileID: 528450948}
+  PlayerAvatarImage: {fileID: 1975361750}
+  PlayerRankingText: {fileID: 871180543}
 --- !u!1 &506038314
 GameObject:
   m_ObjectHideFlags: 0
@@ -7678,6 +7670,7 @@ GameObject:
   - component: {fileID: 511772318}
   - component: {fileID: 511772317}
   - component: {fileID: 511772316}
+  - component: {fileID: 511772320}
   m_Layer: 5
   m_Name: EndGameCanvas
   m_TagString: Untagged
@@ -7732,7 +7725,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 511772315}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 560620703}
@@ -7772,6 +7765,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &511772320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511772315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24f46c0b5f06a3d46bd0cfdaa398a599, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playersUI:
+  - {fileID: 537325749}
+  - {fileID: 1525570191}
+  - {fileID: 502286446}
+  - {fileID: 2029553965}
+  backButton: {fileID: 1116710513}
 --- !u!1 &511823218
 GameObject:
   m_ObjectHideFlags: 0
@@ -8739,13 +8750,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 537325747}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: c1e323bc2c0d1cb498f1207157e30996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 1170393750}
-  PlayerAvatar: {fileID: 221158769}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 2121161779}
+  PlayerNameText: {fileID: 1170393750}
+  PlayerAvatarImage: {fileID: 221158769}
+  PlayerRankingText: {fileID: 2121161779}
 --- !u!1 &560521246
 GameObject:
   m_ObjectHideFlags: 0
@@ -11395,13 +11405,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 716751198}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f9ee383e9573324e9773de42a429d42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 679231154}
-  PlayerAvatar: {fileID: 2055868794}
-  PlayerScore: {fileID: 940044843}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 679231154}
+  PlayerAvatarImage: {fileID: 2055868794}
+  PlayerScoreText: {fileID: 940044843}
 --- !u!1 &721189430
 GameObject:
   m_ObjectHideFlags: 0
@@ -12977,7 +12986,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.85
+  m_fontSize: 27.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -14381,7 +14390,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1116710514}
   m_OnClick:
     m_PersistentCalls:
@@ -18651,10 +18660,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 232086271}
-  PlayerAvatar: {fileID: 359968732}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 232086271}
+  PlayerAvatarImage: {fileID: 359968732}
 --- !u!1 &1493070402
 GameObject:
   m_ObjectHideFlags: 0
@@ -18933,13 +18940,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1525570189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: c1e323bc2c0d1cb498f1207157e30996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 561851178}
-  PlayerAvatar: {fileID: 1112402194}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 301107134}
+  PlayerNameText: {fileID: 561851178}
+  PlayerAvatarImage: {fileID: 1112402194}
+  PlayerRankingText: {fileID: 301107134}
 --- !u!1 &1532035568
 GameObject:
   m_ObjectHideFlags: 0
@@ -20656,13 +20662,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1673535929}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f9ee383e9573324e9773de42a429d42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 643669029}
-  PlayerAvatar: {fileID: 1868424557}
-  PlayerScore: {fileID: 308420671}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 643669029}
+  PlayerAvatarImage: {fileID: 1868424557}
+  PlayerScoreText: {fileID: 308420671}
 --- !u!1 &1676726910
 GameObject:
   m_ObjectHideFlags: 0
@@ -21666,7 +21671,7 @@ Transform:
   m_GameObject: {fileID: 1731515871}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.3453507, y: -7.655145, z: 3532.7898}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21769,7 +21774,6 @@ MonoBehaviour:
   - {fileID: 1652728430}
   - {fileID: 566906622}
   Player1UI: {fileID: 1673535931}
-  Player1Name: {fileID: 643669029}
   HomeSpacesPlayer1:
   - {fileID: 448203633}
   - {fileID: 45344509}
@@ -21777,7 +21781,6 @@ MonoBehaviour:
   - {fileID: 1058874555}
   Player1Parameters: {fileID: 11400000, guid: 991fcacf424fad849bb9114e1cca82b3, type: 2}
   Player2UI: {fileID: 2089624418}
-  Player2Name: {fileID: 312968376}
   HomeSpacesPlayer2:
   - {fileID: 427804149}
   - {fileID: 1694390075}
@@ -21785,7 +21788,6 @@ MonoBehaviour:
   - {fileID: 529504110}
   Player2Parameters: {fileID: 11400000, guid: 03594f6731f9b4943b1f1affd844b715, type: 2}
   Player3UI: {fileID: 273920519}
-  Player3Name: {fileID: 1282742989}
   HomeSpacesPlayer3:
   - {fileID: 321772090}
   - {fileID: 506038317}
@@ -21793,7 +21795,6 @@ MonoBehaviour:
   - {fileID: 228598235}
   Player3Parameters: {fileID: 11400000, guid: 0b97904875e45cf43ba3d818663fed48, type: 2}
   Player4UI: {fileID: 716751200}
-  Player4Name: {fileID: 679231154}
   HomeSpacesPlayer4:
   - {fileID: 1204373523}
   - {fileID: 594305904}
@@ -25122,13 +25123,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2029553963}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: c1e323bc2c0d1cb498f1207157e30996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 664380969}
-  PlayerAvatar: {fileID: 356496222}
-  PlayerScore: {fileID: 0}
-  Ranking: {fileID: 368296317}
+  PlayerNameText: {fileID: 664380969}
+  PlayerAvatarImage: {fileID: 356496222}
+  PlayerRankingText: {fileID: 368296317}
 --- !u!1 &2041707492
 GameObject:
   m_ObjectHideFlags: 0
@@ -25924,13 +25924,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2089624416}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa2d3c36a9e949648a7b2ec099596a68, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f9ee383e9573324e9773de42a429d42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerName: {fileID: 312968376}
-  PlayerAvatar: {fileID: 575442052}
-  PlayerScore: {fileID: 1742453173}
-  Ranking: {fileID: 0}
+  PlayerNameText: {fileID: 312968376}
+  PlayerAvatarImage: {fileID: 575442052}
+  PlayerScoreText: {fileID: 1742453173}
 --- !u!1 &2094437273
 GameObject:
   m_ObjectHideFlags: 0
@@ -26621,7 +26620,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.85
+  m_fontSize: 27.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -26835,7 +26834,8 @@ MonoBehaviour:
   PanelPlay_Online: {fileID: 1515270179}
   LobbyCanvas: {fileID: 752974228}
   GameMenuCanvas: {fileID: 1367282}
-  boardCanvas: {fileID: 1406804429}
+  BoardCanvas: {fileID: 1406804429}
+  EndGameCanvas: {fileID: 511772318}
   PlayButton: {fileID: 1535682963}
   PlayLocalButton: {fileID: 1611889725}
   PlayOnlineButton: {fileID: 1997372044}
@@ -26843,6 +26843,8 @@ MonoBehaviour:
   JoinGameButton: {fileID: 606319603}
   StartGameOnlineButton: {fileID: 729912915}
   StartGameOfflineButton: {fileID: 1563052555}
+  PlayAgainButton: {fileID: 222036676}
+  BackToLobbyButton: {fileID: 1116710513}
   PlayWith2Players: {fileID: 1035724379}
   PlayWith3Players: {fileID: 1214543855}
   PlayWith4Players: {fileID: 1147059273}
