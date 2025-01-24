@@ -10,16 +10,23 @@ using UnityEngine;
 
 public class LudoPlayer : MonoBehaviour
 {
-    public int PlayerNumber;
-    public List<TokenSpace> SpawnSpaces;
-    public List<TokenSpace> LocalBoard;
-    public List<Token> Tokens;
-    public PlayerParameter PlayerParameter;
+    private List<TokenSpace> spawnSpaces;
+    private List<TokenSpace> localBoard;
+    private List<Token> tokens;
+    private PlayerParameter playerParameter;
     public LudoPlayerInfo PlayerInfo;
-    public TokenSpace StartSpace { get; internal set; }
+    private SimplePlayerUI inGamePlayerUI;
+    private TokenSpace startSpace;
     public bool IsBlank = false;
+    private bool hasWon = false;
+    public bool CanPlay => !IsBlank && !hasWon;
+    public int Rank => PlayerInfo.Rank;
+    public FixedString64Bytes ID => PlayerInfo.ID;
+    public FixedString64Bytes Name => PlayerInfo.Name;
+    public bool IsWinningIndex(int index)
+        => playerParameter.WinningSpaceIndex == index;
 
-    public void SpawnTokens(GameObject tokenPrefab, GameObject canvas, int playerIndex)
+    public void SpawnTokens(GameObject tokenPrefab, GameObject canvas, int playerIndex, int tokenCount)
     {
         int tokenIndex = 0;
         SpawnSpaces.ForEach(space =>
@@ -40,7 +47,7 @@ public class LudoPlayer : MonoBehaviour
     {
         newToken.transform.SetParent(canvas.transform);
         newToken.transform.position = space.transform.position;
-        newToken.transform.localScale = new Vector3(4, 4, 4);
+        newToken.transform.localScale = new Vector3(1, 1, 1);
 
         Token token = newToken.GetComponent<Token>();
 
@@ -197,6 +204,44 @@ public class LudoPlayer : MonoBehaviour
             return null;
         }
 
-        return LocalBoard[newPositionIndex];
+        return localBoard[newPositionIndex];
+    }
+
+    public IEnumerable<Token> GetPlayableTokens()
+    {
+        return tokens.Where(t => !t.HasWon);
+    }
+
+    internal void Score()
+    {
+        var localPlayerInfo = PlayerInfo;
+        localPlayerInfo.Score++;
+        PlayerInfo = localPlayerInfo;
+        inGamePlayerUI.SetPlayerInfo(PlayerInfo);
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        inGamePlayerUI.UpdateUI();
+    }
+
+    internal void Setup(LudoPlayerInfo playerInfo, SimplePlayerUI playerUI, PlayerParameter playerParameter, List<TokenSpace> spawnSpaces)
+    {
+        this.PlayerInfo = playerInfo;
+        inGamePlayerUI = playerUI;
+        inGamePlayerUI.SetPlayerInfo(playerInfo);
+        this.playerParameter = playerParameter;
+        this.spawnSpaces = spawnSpaces;
+        tokens = new List<Token>();
+        UpdateUI();
+    }
+
+    public void Win(int rank)
+    {
+        hasWon = true;
+        var localPlayerInfo = PlayerInfo;
+        localPlayerInfo.Rank = rank;
+        PlayerInfo = localPlayerInfo;
     }
 }
