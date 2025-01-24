@@ -10,7 +10,7 @@ public class LobbyManager : NetworkBehaviour
 {
 
     [SerializeField]
-    private List<PlayerUI> playerLobbyUIs;
+    private List<SimplePlayerUI> playerLobbyUIs;
     private ILobbyEvents m_LobbyEvents;
 
     public void StartGame()
@@ -71,6 +71,7 @@ public class LobbyManager : NetworkBehaviour
         {
             LudoPlayerInfo playerInfo = new(player);
             playerLobbyUIs[index].SetPlayerInfo(playerInfo);
+            playerLobbyUIs[index].UpdateUI();
             index++;
         });
         for (int i = index; i < playerLobbyUIs.Count; i++)

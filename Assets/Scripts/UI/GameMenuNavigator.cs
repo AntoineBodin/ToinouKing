@@ -15,7 +15,8 @@ public class GameMenuNavigator : MonoBehaviour
 
     public Canvas LobbyCanvas;
     public Canvas GameMenuCanvas;
-    public Canvas boardCanvas;
+    public Canvas BoardCanvas;
+    public Canvas EndGameCanvas;
 
     public Button PlayButton;
     public Button PlayLocalButton;
@@ -24,6 +25,8 @@ public class GameMenuNavigator : MonoBehaviour
     public Button JoinGameButton;
     public Button StartGameOnlineButton;
     public Button StartGameOfflineButton;
+    public Button PlayAgainButton;
+    public Button BackToLobbyButton;
 
     public Toggle PlayWith2Players;
     public Toggle PlayWith3Players;
@@ -59,6 +62,8 @@ public class GameMenuNavigator : MonoBehaviour
         JoinGameButton.onClick.AddListener(QuickJoinGame);
         StartGameOnlineButton.onClick.AddListener(StartGameOnline);
         StartGameOfflineButton.onClick.AddListener(StartGameOffline);
+        PlayAgainButton.onClick.AddListener(PlayAgain);
+        BackToLobbyButton.onClick.AddListener(BackToLobby);
     }
 
     private void DisplayPlayPanel()
@@ -77,6 +82,12 @@ public class GameMenuNavigator : MonoBehaviour
     {
         PanelPlay_Online.SetActive(true);
         PlayPanel.SetActive(false);
+    }
+
+    public void DisplayEndGamePanel()
+    {
+        EndGameCanvas.enabled = true;
+        BoardCanvas.enabled = false;
     }
 
     private async void HostGame()
@@ -112,7 +123,6 @@ public class GameMenuNavigator : MonoBehaviour
         DisplayLobbyCanvas();
     }
 
-
     private void StartGameOnline()
     {
         LobbyManager.StartGame();
@@ -130,9 +140,20 @@ public class GameMenuNavigator : MonoBehaviour
     {
         GameMenuCanvas.enabled = false;
         LobbyCanvas.enabled = false;
-        boardCanvas.enabled = true;
+        BoardCanvas.enabled = true;
     }
 
+    private void PlayAgain()
+    {
+        EndGameCanvas.enabled = false;
+        GameMenuCanvas.enabled = true;
+    }
+
+    private void BackToLobby()
+    {
+        EndGameCanvas.enabled = false;
+        LobbyCanvas.enabled = true;
+    }
     #endregion
 
     #region TOGGLES
