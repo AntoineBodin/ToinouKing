@@ -119,7 +119,7 @@ public class GameManager : NetworkBehaviour
     private void CreatePlayers()
     {
         int playerIndex = 0;
-        GameParameters.Players.ForEach(playerInfo => 
+        GameParameters.Players.ForEach(playerInfo =>
         {
             if (playerInfo.AvatarID == 0)
             {
@@ -176,6 +176,7 @@ public class GameManager : NetworkBehaviour
         currentPlayerIndex = 0;
         winningPlayerIndex = 1;
         roundInfo.Reset();
+        TokenSpaces.ForEach(t => t.TokensByPlayer.Clear());
     }
     private void Update()
     {
