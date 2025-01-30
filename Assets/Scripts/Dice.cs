@@ -24,11 +24,15 @@ public class Dice : NetworkBehaviour
 
         Debug.Log("Dice value: " + diceValue);
 
-        if (GameManager.Instance.GameParameters.IsOnline)
+        if (GameManager.Instance.IsOnline)
         {
-            if (GameManager.CanPlayIfOnline)
+            if (GameManager.IsMyTurn)
             {
                 Roll_ServerRpc(diceValue);
+            }
+            else
+            {
+                Debug.Log("Not your turn to roll the dice.");
             }
         }
         else

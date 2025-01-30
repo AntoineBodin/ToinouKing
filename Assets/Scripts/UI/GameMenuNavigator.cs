@@ -58,9 +58,7 @@ public class GameMenuNavigator : MonoBehaviour
         PlayButton.onClick.AddListener(DisplayPlayPanel);
         PlayLocalButton.onClick.AddListener(DisplayPlayLocalPanel);
         PlayOnlineButton.onClick.AddListener(DisplayPlayOnlinePanel);
-        HostGameButton.onClick.AddListener(HostGame);
-        JoinGameButton.onClick.AddListener(QuickJoinGame);
-        StartGameOnlineButton.onClick.AddListener(StartGameOnline);
+        
         StartGameOfflineButton.onClick.AddListener(StartGameOffline);
         PlayAgainButton.onClick.AddListener(PlayAgain);
         BackToLobbyButton.onClick.AddListener(BackToLobby);
@@ -103,7 +101,7 @@ public class GameMenuNavigator : MonoBehaviour
         DisplayLobbyCanvas();
     }
 
-    private void DisplayLobbyCanvas()
+    public void DisplayLobbyCanvas()
     {
         LobbyCanvas.enabled = true;
         GameMenuCanvas.enabled = false;
@@ -118,9 +116,9 @@ public class GameMenuNavigator : MonoBehaviour
             Name = new(OnlinePlayerName.text),
         };
 
-        await Multiplayer.Instance.QuickJoinLobby(playerInfo);
-
         DisplayLobbyCanvas();
+
+        await Multiplayer.Instance.QuickJoinLobby(playerInfo);
     }
 
     private void StartGameOnline()
