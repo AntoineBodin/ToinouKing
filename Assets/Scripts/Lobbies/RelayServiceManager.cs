@@ -22,7 +22,11 @@ public class RelayServiceManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        unityTransport = GetComponent<UnityTransport>();
+    }
+
+    private void Start()
+    {
+        unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
     }
 
     // Démarrer un serveur Relay
@@ -32,7 +36,7 @@ public class RelayServiceManager : MonoBehaviour
         {
             var allocation = await RelayService.Instance.CreateAllocationAsync(maxPlayers);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-             unityTransport.SetRelayServerData(allocation.ToRelayServerData("wss"));
+            unityTransport.SetRelayServerData(allocation.ToRelayServerData("wss"));
             Debug.Log($"Relay server started with Join Code: {joinCode}");
 
             NetworkManager.Singleton.StartHost();
