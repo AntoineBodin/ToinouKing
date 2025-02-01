@@ -15,7 +15,6 @@ public class LobbyServiceManager : NetworkBehaviour
 {
     public Lobby CurrentLobby;
     public static LobbyServiceManager Instance { get; private set; }
-    //private string relayCode;
 
     private void Awake()
     {
@@ -62,14 +61,13 @@ public class LobbyServiceManager : NetworkBehaviour
 
             Debug.Log($"Lobby created with ID: {CurrentLobby.Id} and Relay Code: {relayCode}");
 
-            var callbacks = LobbyManager2.Instance.GetLobbyEventCallbacks();
+            var callbacks = LobbyCallBackManager.Instance.GetLobbyEventCallbacks();
 
             var lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(CurrentLobby.Id, callbacks);
 
             GameManager.Instance.OnlinePlayerIdentity = playerInfo;
 
             HeartBeatPingManager.Instance.StartHeartBeatTimer();
-            //HeartBeatPingManager.Instance.StartKeepAliveTimer();
 
             return CurrentLobby;
         }

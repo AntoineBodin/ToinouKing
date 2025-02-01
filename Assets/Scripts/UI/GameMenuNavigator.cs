@@ -8,16 +8,21 @@ using UnityEngine.UI;
 
 public class GameMenuNavigator : MonoBehaviour
 {
+
+    [Header("Panels")]
     public GameObject LandingPanel;
     public GameObject PlayPanel;
     public GameObject PanelPlay_Local;
     public GameObject PanelPlay_Online;
 
+    [Header("Canvases")]
     public Canvas LobbyCanvas;
     public Canvas GameMenuCanvas;
     public Canvas BoardCanvas;
     public Canvas EndGameCanvas;
+    private Canvas currentCanvas;
 
+    [Header("Buttons")]
     public Button PlayButton;
     public Button PlayLocalButton;
     public Button PlayOnlineButton;
@@ -28,25 +33,35 @@ public class GameMenuNavigator : MonoBehaviour
     public Button PlayAgainButton;
     public Button BackToLobbyButton;
 
+    [Header("Toggles")]
     public Toggle PlayWith2Players;
     public Toggle PlayWith3Players;
     public Toggle PlayWith4Players;
 
+    [Header("InputFields")]
     public TMP_InputField Player1Name;
     public TMP_InputField Player2Name;
     public TMP_InputField Player3Name;
     public TMP_InputField Player4Name;
-
     public TMP_InputField OnlinePlayerName;
 
-    public NetworkManager NetworkManager;
-    public LobbyManager LobbyManager;
-    public GameManager gameManager;
-
     public static GameMenuNavigator Instance;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
+    }
+
     private void Start()
     {
-        Instance = this;
+        currentCanvas = GameMenuCanvas;
         SetupToggles();
         SetupButtons();
     }
@@ -61,7 +76,7 @@ public class GameMenuNavigator : MonoBehaviour
         
         StartGameOfflineButton.onClick.AddListener(StartGameOffline);
         PlayAgainButton.onClick.AddListener(PlayAgain);
-        BackToLobbyButton.onClick.AddListener(BackToLobby);
+        BackToLobbyButton.onClick.AddListener(DisplayLobbyCanvas);
     }
 
     private void DisplayPlayPanel()
@@ -84,46 +99,16 @@ public class GameMenuNavigator : MonoBehaviour
 
     public void DisplayEndGamePanel()
     {
+        currentCanvas.enabled = false;
         EndGameCanvas.enabled = true;
-        BoardCanvas.enabled = false;
-    }
-
-    private async void HostGame()
-    {
-        LudoPlayerInfo playerInfo = new()
-        {
-            ID = new(PlayerConfiguration.Instance.PlayerID),
-            AvatarID = 0,
-            Name = new(OnlinePlayerName.text),
-        };
-
-        var joinCode = await Multiplayer.Instance.CreateLobby(playerInfo);
-        DisplayLobbyCanvas();
+        currentCanvas = EndGameCanvas;
     }
 
     public void DisplayLobbyCanvas()
     {
+        currentCanvas.enabled = false;
         LobbyCanvas.enabled = true;
-        GameMenuCanvas.enabled = false;
-    }
-
-    private async void QuickJoinGame()
-    {
-        LudoPlayerInfo playerInfo = new()
-        {
-            ID = new(PlayerConfiguration.Instance.PlayerID),
-            AvatarID = 0,
-            Name = new(OnlinePlayerName.text),
-        };
-
-        DisplayLobbyCanvas();
-
-        await Multiplayer.Instance.QuickJoinLobby(playerInfo);
-    }
-
-    private void StartGameOnline()
-    {
-        LobbyManager.StartGame();
+        currentCanvas = LobbyCanvas;
     }
 
     private void StartGameOffline()
@@ -132,26 +117,20 @@ public class GameMenuNavigator : MonoBehaviour
         GameManager.Instance.StartGame(GetOfflineGameParameters());
     }
 
-    private void StartGameLocal() { }
-
     public void DisplayBoardCanvas()
     {
-        GameMenuCanvas.enabled = false;
-        LobbyCanvas.enabled = false;
+        currentCanvas.enabled = false;
         BoardCanvas.enabled = true;
+        currentCanvas = BoardCanvas;
     }
 
     private void PlayAgain()
     {
-        EndGameCanvas.enabled = false;
+        currentCanvas.enabled = false;
         GameMenuCanvas.enabled = true;
+        currentCanvas = GameMenuCanvas;
     }
 
-    private void BackToLobby()
-    {
-        EndGameCanvas.enabled = false;
-        LobbyCanvas.enabled = true;
-    }
     #endregion
 
     #region TOGGLES
@@ -226,12 +205,8 @@ public class GameMenuNavigator : MonoBehaviour
 
     private GameParameters GetOfflineGameParameters()
     {
-        return new GameParameters()
-        {
-            IsOnline = false,
-            Players = GetOfflinePlayerList(),
-            FirstPlayerIndex = 0,
-        };
+        return GameParametersManager.Instance.GetOfflineParameters(GetOfflinePlayerList());
+
     }
 
     private List<LudoPlayerInfo> GetOfflinePlayerList()

@@ -162,7 +162,7 @@ public class LobbyUIManager : MonoBehaviour
     {
         return new LudoPlayerInfo
         {
-            ID = new(PlayerConfiguration.Instance.PlayerID),
+            ID = new(PlayerConfiguration.Instance.GetPlayerID()),
             AvatarID = 0,
             Name = new(playerName.text)
         };

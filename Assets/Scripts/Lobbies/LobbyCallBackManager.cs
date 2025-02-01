@@ -11,12 +11,11 @@ using System.Threading.Tasks;
 using Assets.Scripts;
 using System.Linq;
 
-public class LobbyManager2 : MonoBehaviour
+public class LobbyCallBackManager : MonoBehaviour
 { 
-    private Lobby currentLobby;
     private ILobbyEvents lobbyEvents;
 
-    public static LobbyManager2 Instance;
+    public static LobbyCallBackManager Instance;
 
     private void Awake()
     {
