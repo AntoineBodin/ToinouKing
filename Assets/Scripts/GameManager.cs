@@ -14,7 +14,6 @@ using UnityEngine;
 
 public class GameManager : NetworkBehaviour
 {
-    public GameParameters GameParameters;
     public GameObject TokenPrefab;
     public GameObject PlayerPrefab;
     public Dice Dice;
@@ -22,6 +21,7 @@ public class GameManager : NetworkBehaviour
     public GameObject Canvas;
     private List<Token> tokens = new();
 
+    private GameParameters gameParameters;
     private int playerCount = 0;
     private int currentPlayerIndex = 0;
     private int winningPlayerIndex = 1;
@@ -63,8 +63,8 @@ public class GameManager : NetworkBehaviour
     public List<LudoPlayer> Players = new();
 
     public bool IsMyTurn => OnlinePlayerIdentity.ID == CurrentPlayer.ID;
-
-    public bool CanPlayIfOnline => !GameParameters.IsOnline || IsMyTurn;
+    public bool IsOnline => gameParameters != null && gameParameters.IsOnline;
+    public bool CanPlayIfOnline => !IsOnline || IsMyTurn;
 
     public LudoPlayerInfo OnlinePlayerIdentity { get; internal set; }
 
@@ -79,8 +79,8 @@ public class GameManager : NetworkBehaviour
 
     internal void StartGame(GameParameters gameParameters)
     {
-        GameParameters = gameParameters;
-        playerCount = GameParameters.Players.Count;
+        this.gameParameters = gameParameters;
+        playerCount = this.gameParameters.Players.Count;
         Debug.Log("Start game with " + playerCount + " players");
         if (playerCount == 2)
         {
@@ -99,31 +99,21 @@ public class GameManager : NetworkBehaviour
         CreatePlayers();
         SpawnTokens();
 
-        currentPlayerIndex = GameParameters.FirstPlayerIndex;
+        currentPlayerIndex = this.gameParameters.FirstPlayerIndex;
 
         UpdateCurrentPlayer();
 
         SwitchToStateStartRound();
     }
 
-    private void SetupOnline() 
-    {
-        var gp = new GameParameters()
-        {
-            Players = new(), //get from lobby
-        };
-    }
-
-    private void SetupLocal() { }
-
     private void CreatePlayers()
     {
         int playerIndex = 0;
-        GameParameters.Players.ForEach(playerInfo => 
+        gameParameters.Players.ForEach(playerInfo =>
         {
             if (playerInfo.AvatarID == 0)
             {
-                playerInfo.AvatarID = GameParameters.DefaultAvatarID;
+                playerInfo.AvatarID = gameParameters.DefaultAvatarID;
             }
 
             LudoPlayer player = CreatePlayer(playerIndex, playerInfo);
@@ -151,15 +141,15 @@ public class GameManager : NetworkBehaviour
         {
             if (!player.IsBlank)
             {
-                player.SpawnTokens(TokenPrefab, Canvas, playerIndex, GameParameters.tokenCount);
+                player.SpawnTokens(TokenPrefab, Canvas, playerIndex, gameParameters.tokenCount);
             }
             playerIndex++;
         });
     }
 
-    public void AddToken(Token token)
+    public void AddTokens(List<Token> newTokens)
     {
-        tokens.Add(token);
+        tokens.AddRange(newTokens);
     }
 
     #endregion
@@ -176,6 +166,7 @@ public class GameManager : NetworkBehaviour
         currentPlayerIndex = 0;
         winningPlayerIndex = 1;
         roundInfo.Reset();
+        TokenSpaces.ForEach(t => t.TokensByPlayer.Clear());
     }
     private void Update()
     {
@@ -209,19 +200,17 @@ public class GameManager : NetworkBehaviour
 
     private void SaveGameToLobby()
     {
-        Snapshot snapshot = new Snapshot()
+        Snapshot snapshot = new()
         {
             Tokens = tokens,
             Players = Players,
             CurrentPlayer = CurrentPlayer
         };
 
-        JsonSerializer serializer = new JsonSerializer();
-
         string snapshotJson = JsonConvert.SerializeObject(snapshot);
         Debug.Log(snapshotJson);
 
-        LobbyService.Instance.UpdateLobbyAsync(Multiplayer.Instance.CurrentLobby.Id, new UpdateLobbyOptions()
+        LobbyService.Instance.UpdateLobbyAsync(LobbyServiceManager.Instance.CurrentLobby.Id, new UpdateLobbyOptions()
         {
             Data = new()
             {
@@ -308,7 +297,7 @@ public class GameManager : NetworkBehaviour
     public void PickToken(int tokenID)
     {
         Debug.Log("Token chosen: " + tokenID);
-        if (GameParameters.IsOnline)
+        if (gameParameters.IsOnline)
         {
             PickToken_ServerRPC(tokenID);
         }
@@ -487,8 +476,7 @@ public class GameManager : NetworkBehaviour
     {
         Players.Find(t => t.CanPlay).Win(winningPlayerIndex);
         GameMenuNavigator.Instance.DisplayEndGamePanel();
-        EndGameUIManager.Instance.SetPlayers(Players);
-        EndGameUIManager.Instance.SetOnline(GameParameters.IsOnline);
+        EndGameUIManager.Instance.UpdateUI(Players);
         ResetGame();
     }
 }

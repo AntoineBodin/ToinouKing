@@ -11,24 +11,37 @@ namespace Assets.Scripts
         private const string default_PlayerID = "not initialized";
         private const string default_PlayerName = "";
 
-        [SerializeField]
-        public string PlayerID;// { get; internal set; }
-        [SerializeField]
-        public string PlayerName;
+        private string playerID;// { get; internal set; }
+        private string playerName;
 
         public static PlayerConfiguration Instance { get; private set; }
 
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(this);
+            }
+        }
         private void Start()
         {
-            Instance = this;
-
             SetupPlayerID();
             SetupPlayerName();
         }
 
+        public string GetPlayerID()
+        {
+            return playerID;
+        }
+
+
         private void SetupPlayerName()
         {
-            PlayerName = PlayerPrefs.GetString(k_PlayerName, default_PlayerName);
+            playerName = PlayerPrefs.GetString(k_PlayerName, default_PlayerName);
         }
 
         private void SetupPlayerID()
@@ -41,7 +54,7 @@ namespace Assets.Scripts
                 PlayerPrefs.SetString(k_PlayerID, playerID);
             }
             Debug.Log(playerID);
-            PlayerID = playerID;
+            this.playerID = playerID;
         }
 
         public void SetPlayerPrefsName(string name)
