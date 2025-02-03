@@ -22249,31 +22249,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1736422671}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 111891903}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 1151163305}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1736422671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24214,6 +24190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  PlayerId: 
 --- !u!4 &1958777547
 Transform:
   m_ObjectHideFlags: 0
@@ -26043,7 +26020,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 23.85
+  m_fontSize: 29
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -27205,7 +27182,6 @@ MonoBehaviour:
   PlayOnlineButton: {fileID: 1997372044}
   StartGameOnlineButton: {fileID: 729912915}
   StartGameOfflineButton: {fileID: 1563052555}
-  BackToLobbyButton: {fileID: 0}
   PlayWith2Players: {fileID: 1035724379}
   PlayWith3Players: {fileID: 1214543855}
   PlayWith4Players: {fileID: 1147059273}
