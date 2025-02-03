@@ -5,10 +5,15 @@ using UnityEngine;
 using System.Threading.Tasks;
 using Unity.Netcode.Transports.UTP;
 using Unity.Netcode;
+using System;
+using Unity.Services.Authentication;
+using Unity.Networking.Transport.Error;
 
 public class RelayServiceManager : MonoBehaviour
 {
     public static RelayServiceManager Instance { get; private set; }
+    public string HostId { get; internal set; }
+
     private UnityTransport unityTransport;
 
     private void Awake()
@@ -43,7 +48,7 @@ public class RelayServiceManager : MonoBehaviour
 
             return joinCode;
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Debug.LogError($"Failed to start Relay server: {ex.Message}");
             return null;
@@ -65,5 +70,11 @@ public class RelayServiceManager : MonoBehaviour
         {
             Debug.LogError($"Failed to join Relay server: {ex.Message}");
         }
+    }
+
+    internal async Task JoinNewRelayServer(string newRelayJoinCode)
+    {
+        Debug.Log($"Joining new relay server with code: {newRelayJoinCode}.");
+        await JoinRelayAsync(newRelayJoinCode);
     }
 }

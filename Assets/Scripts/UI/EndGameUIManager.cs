@@ -10,6 +10,7 @@ public class EndGameUIManager : MonoBehaviour
     [SerializeField] private List<SimplePlayerUI> playersUI;
 
     [SerializeField] private Button backButton;
+    [SerializeField] private TMP_Text backButtonText;
 
     public static EndGameUIManager Instance;
 
@@ -18,7 +19,15 @@ public class EndGameUIManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SetPlayers(List<LudoPlayer> players)
+    public void UpdateUI(List<LudoPlayer> players)
+    {
+        SetPlayers(players);
+        backButton.onClick.RemoveAllListeners();
+        backButtonText.text = GameManager.Instance.IsOnline ? "Back to Lobby" : "Play Again";
+        backButton.onClick.AddListener(GameManager.Instance.IsOnline ? BackToLobbyAction : PlayAgainAction);
+    }
+
+    private void SetPlayers(List<LudoPlayer> players)
     {
         int playerUIIndex = 0;
         players.OrderBy(p => p.Rank).ToList().ForEach(p =>
@@ -33,8 +42,13 @@ public class EndGameUIManager : MonoBehaviour
         }
     }
 
-    public void SetOnline(bool isOnlineGame)
+    private void BackToLobbyAction()
     {
-        backButton.interactable = isOnlineGame;
+        GameMenuNavigator.Instance.DisplayLobbyCanvas();
+    }
+
+    private void PlayAgainAction()
+    {
+        GameMenuNavigator.Instance.DisplayGameMenuCanvas();
     }
 }

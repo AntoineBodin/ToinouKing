@@ -26,12 +26,8 @@ public class GameMenuNavigator : MonoBehaviour
     public Button PlayButton;
     public Button PlayLocalButton;
     public Button PlayOnlineButton;
-    public Button HostGameButton;
-    public Button JoinGameButton;
     public Button StartGameOnlineButton;
     public Button StartGameOfflineButton;
-    public Button PlayAgainButton;
-    public Button BackToLobbyButton;
 
     [Header("Toggles")]
     public Toggle PlayWith2Players;
@@ -75,8 +71,6 @@ public class GameMenuNavigator : MonoBehaviour
         PlayOnlineButton.onClick.AddListener(DisplayPlayOnlinePanel);
         
         StartGameOfflineButton.onClick.AddListener(StartGameOffline);
-        PlayAgainButton.onClick.AddListener(PlayAgain);
-        BackToLobbyButton.onClick.AddListener(DisplayLobbyCanvas);
     }
 
     private void DisplayPlayPanel()
@@ -124,7 +118,7 @@ public class GameMenuNavigator : MonoBehaviour
         currentCanvas = BoardCanvas;
     }
 
-    private void PlayAgain()
+    public void DisplayGameMenuCanvas()
     {
         currentCanvas.enabled = false;
         GameMenuCanvas.enabled = true;

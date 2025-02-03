@@ -147,9 +147,9 @@ public class GameManager : NetworkBehaviour
         });
     }
 
-    public void AddToken(Token token)
+    public void AddTokens(List<Token> tokens)
     {
-        tokens.Add(token);
+        tokens.AddRange(tokens);
     }
 
     #endregion
@@ -476,8 +476,7 @@ public class GameManager : NetworkBehaviour
     {
         Players.Find(t => t.CanPlay).Win(winningPlayerIndex);
         GameMenuNavigator.Instance.DisplayEndGamePanel();
-        EndGameUIManager.Instance.SetPlayers(Players);
-        EndGameUIManager.Instance.SetOnline(gameParameters.IsOnline);
+        EndGameUIManager.Instance.UpdateUI(Players);
         ResetGame();
     }
 }
