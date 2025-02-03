@@ -147,9 +147,9 @@ public class GameManager : NetworkBehaviour
         });
     }
 
-    public void AddTokens(List<Token> tokens)
+    public void AddTokens(List<Token> newTokens)
     {
-        tokens.AddRange(tokens);
+        tokens.AddRange(newTokens);
     }
 
     #endregion
