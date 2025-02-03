@@ -80,9 +80,9 @@ namespace Assets.Scripts.Lobbies
 
         private Action HeartBeatAction()
         {
-            return () =>
+            return async () =>
             {
-                Task.Run(() => HandleHeartBeatAsync());
+                await HandleHeartBeatAsync();
                 lobbyHeartbeatTimer.Start();
             };
         }
@@ -136,6 +136,13 @@ namespace Assets.Scripts.Lobbies
             relayKeepAliveTimer.OnTimerStop -= relayKeepAliveAction;
         }
 
+        internal void UnsubscribeToAll()
+        {
+            lobbyHeartbeatTimer.Stop();
+            relayKeepAliveTimer.Stop();
 
+            UnsubscribeHeartbeat();
+            UnsubscribeKeepAlive();
+        }
     }
 }

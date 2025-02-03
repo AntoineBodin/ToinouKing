@@ -12,8 +12,9 @@ using Unity.Netcode;
 
 public class LobbyUIManager : MonoBehaviour
 {
-    public Button hostJoinButton;
-    public Button startGameButton;
+    [SerializeField] private Button hostJoinButton;
+    [SerializeField] private Button startGameButton;
+    [SerializeField] private Button backButton;
     public TMP_InputField joinCodeInputField;
     public TMP_InputField playerName;
     public TMP_Text LobbyCode;
@@ -78,6 +79,11 @@ public class LobbyUIManager : MonoBehaviour
             {
                 Debug.Log("Only host can start the game.");
             }
+        });
+
+        backButton.onClick.AddListener(async () => {
+            await LobbyServiceManager.Instance.DisconnectFromLobby();
+            GameMenuNavigator.Instance.DisplayGameMenuCanvas();
         });
     }
 
@@ -162,7 +168,7 @@ public class LobbyUIManager : MonoBehaviour
     {
         return new LudoPlayerInfo
         {
-            ID = new(PlayerConfiguration.Instance.PlayerID),
+            ID = new(PlayerConfiguration.Instance.GetPlayerID()),
             AvatarID = 0,
             Name = new(playerName.text)
         };

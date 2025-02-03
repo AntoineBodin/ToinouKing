@@ -10,13 +10,11 @@ using Unity.Services.Core;
 using System.Threading.Tasks;
 using Assets.Scripts;
 using System.Linq;
+using Unity.Services.Authentication;
 
-public class LobbyManager2 : MonoBehaviour
-{ 
-    private Lobby currentLobby;
-    private ILobbyEvents lobbyEvents;
-
-    public static LobbyManager2 Instance;
+public class LobbyCallBackManager : MonoBehaviour
+{
+    public static LobbyCallBackManager Instance;
 
     private void Awake()
     {
@@ -29,6 +27,7 @@ public class LobbyManager2 : MonoBehaviour
             Destroy(this);
         }
     }
+
 
     public LobbyEventCallbacks GetLobbyEventCallbacks()
     {
@@ -46,6 +45,7 @@ public class LobbyManager2 : MonoBehaviour
     // Gestion des changements dans le lobby
     private void OnLobbyChanged(ILobbyChanges changes)
     {
+        Debug.Log("Changes to lobby detected");
         changes.ApplyToLobby(LobbyServiceManager.Instance.CurrentLobby);
         UpdateLobbyUI();
     }
@@ -65,26 +65,49 @@ public class LobbyManager2 : MonoBehaviour
     {
         foreach (var playerId in playerIds)
         {
-            Debug.Log($"Le joueur {playerId} a quitté le lobby.");
+            Debug.Log($"Player {playerId} disconnected.");
         }
         UpdateLobbyUI();
     }
 
-    // Données du lobby ont changé
-    private void OnDataChanged(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> data)
+    private async void OnDataChanged(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> data)
     {
-        Debug.Log("Les données du lobby ont changé.");
-        // Traite les changements de données ici
+        Debug.Log("Lobby data changed.");
+
+        if (data.TryGetValue("RelayHostId", out ChangedOrRemovedLobbyValue<DataObject> newRelayHostIdLobbyData))
+        {
+            var newRelayHostId = newRelayHostIdLobbyData.Value.Value;
+            Debug.Log($"Detected change in hostId : {newRelayHostId}.");
+            if (LobbyServiceManager.Instance.PlayerId == newRelayHostId)
+            {
+                Debug.Log("Host => Create new server !");
+                await LobbyServiceManager.Instance.ChangeHost();
+            }
+            RelayServiceManager.Instance.HostId = newRelayHostId;
+        }
+
+        if (data.TryGetValue("RelayCode", out ChangedOrRemovedLobbyValue<DataObject> newRelayJoinCodeLobbyData))
+        {
+            var newRelayJoinCode = newRelayJoinCodeLobbyData.Value.Value;
+            Debug.Log($"Detected change in relay join code : {newRelayJoinCode}.");
+            if (LobbyServiceManager.Instance.PlayerId != RelayServiceManager.Instance.HostId)
+            {
+                Debug.Log("Client => Join new server !");
+                await RelayServiceManager.Instance.JoinNewRelayServer(newRelayJoinCode);
+            }
+            else
+            {
+                Debug.Log("Host does not need to join new relay server.");
+            }
+        }
     }
 
-    // Données des joueurs ont changé
     private void OnPlayerDataChanged(Dictionary<int, Dictionary<string, ChangedOrRemovedLobbyValue<PlayerDataObject>>> playerData)
     {
         Debug.Log("Les données des joueurs ont changé.");
         // Traite les changements de données des joueurs ici
     }
 
-    // État de la connexion du service Lobby a changé
     private void OnLobbyEventConnectionStateChanged(LobbyEventConnectionState state)
     {
         Debug.Log($"L'état de la connexion au lobby a changé : {state}");
@@ -99,9 +122,10 @@ public class LobbyManager2 : MonoBehaviour
     private async void OnDestroy()
     {
         // Désabonnement des événements
+        /*
         if (lobbyEvents != null)
         {
             await lobbyEvents.UnsubscribeAsync();
-        }
+        }*/
     }
 }

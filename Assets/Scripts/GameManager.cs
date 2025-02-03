@@ -63,7 +63,7 @@ public class GameManager : NetworkBehaviour
     public List<LudoPlayer> Players = new();
 
     public bool IsMyTurn => OnlinePlayerIdentity.ID == CurrentPlayer.ID;
-    public bool IsOnline => gameParameters == null ? false : gameParameters.IsOnline;
+    public bool IsOnline => gameParameters != null && gameParameters.IsOnline;
     public bool CanPlayIfOnline => !IsOnline || IsMyTurn;
 
     public LudoPlayerInfo OnlinePlayerIdentity { get; internal set; }
@@ -106,16 +106,6 @@ public class GameManager : NetworkBehaviour
         SwitchToStateStartRound();
     }
 
-    private void SetupOnline() 
-    {
-        var gp = new GameParameters()
-        {
-            Players = new(), //get from lobby
-        };
-    }
-
-    private void SetupLocal() { }
-
     private void CreatePlayers()
     {
         int playerIndex = 0;
@@ -157,9 +147,9 @@ public class GameManager : NetworkBehaviour
         });
     }
 
-    public void AddToken(Token token)
+    public void AddTokens(List<Token> tokens)
     {
-        tokens.Add(token);
+        tokens.AddRange(tokens);
     }
 
     #endregion
@@ -210,19 +200,17 @@ public class GameManager : NetworkBehaviour
 
     private void SaveGameToLobby()
     {
-        Snapshot snapshot = new Snapshot()
+        Snapshot snapshot = new()
         {
             Tokens = tokens,
             Players = Players,
             CurrentPlayer = CurrentPlayer
         };
 
-        JsonSerializer serializer = new JsonSerializer();
-
         string snapshotJson = JsonConvert.SerializeObject(snapshot);
         Debug.Log(snapshotJson);
 
-        LobbyService.Instance.UpdateLobbyAsync(Multiplayer.Instance.CurrentLobby.Id, new UpdateLobbyOptions()
+        LobbyService.Instance.UpdateLobbyAsync(LobbyServiceManager.Instance.CurrentLobby.Id, new UpdateLobbyOptions()
         {
             Data = new()
             {
@@ -488,8 +476,7 @@ public class GameManager : NetworkBehaviour
     {
         Players.Find(t => t.CanPlay).Win(winningPlayerIndex);
         GameMenuNavigator.Instance.DisplayEndGamePanel();
-        EndGameUIManager.Instance.SetPlayers(Players);
-        EndGameUIManager.Instance.SetOnline(gameParameters.IsOnline);
+        EndGameUIManager.Instance.UpdateUI(Players);
         ResetGame();
     }
 }

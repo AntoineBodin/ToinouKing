@@ -10,12 +10,15 @@ using System;
 using Assets.Scripts.Lobbies;
 using Unity.Netcode;
 using System.Linq;
+using Unity.Services.Relay;
 
 public class LobbyServiceManager : NetworkBehaviour
 {
     public Lobby CurrentLobby;
+    public string PlayerId;
+    private ILobbyEvents lobbyEvents;
+
     public static LobbyServiceManager Instance { get; private set; }
-    //private string relayCode;
 
     private void Awake()
     {
@@ -49,12 +52,16 @@ public class LobbyServiceManager : NetworkBehaviour
 
             // Créer une allocation Relay
             var relayCode = await RelayServiceManager.Instance.StartRelayHosting(maxPlayers);
+            RelayServiceManager.Instance.HostId = PlayerId;
 
             // Stocker le code Relay dans les données du lobby
             var relayData = new UpdateLobbyOptions()
             {
                 Data = new Dictionary<string, DataObject>()
-                { { "RelayCode", new DataObject(DataObject.VisibilityOptions.Member, relayCode) } }
+                {
+                    { "RelayCode", new DataObject(DataObject.VisibilityOptions.Member, relayCode) },
+                    { "RelayHostId", new DataObject(DataObject.VisibilityOptions.Member, PlayerId) }
+                }
             };
 
             // Ajouter le code Relay dans les données du lobby
@@ -62,14 +69,12 @@ public class LobbyServiceManager : NetworkBehaviour
 
             Debug.Log($"Lobby created with ID: {CurrentLobby.Id} and Relay Code: {relayCode}");
 
-            var callbacks = LobbyManager2.Instance.GetLobbyEventCallbacks();
-
-            var lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(CurrentLobby.Id, callbacks);
+            var callbacks = LobbyCallBackManager.Instance.GetLobbyEventCallbacks();
+            lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(CurrentLobby.Id, callbacks);
 
             GameManager.Instance.OnlinePlayerIdentity = playerInfo;
 
             HeartBeatPingManager.Instance.StartHeartBeatTimer();
-            //HeartBeatPingManager.Instance.StartKeepAliveTimer();
 
             return CurrentLobby;
         }
@@ -105,8 +110,25 @@ public class LobbyServiceManager : NetworkBehaviour
 
                 await RelayServiceManager.Instance.JoinRelayAsync(relayCode);
             }
+            else
+            {
+                throw new Exception("Current lobby data did not contain the key 'RelayCode'.");
+            }
+
+            if (CurrentLobby.Data.ContainsKey("RelayHostId"))
+            {
+                RelayServiceManager.Instance.HostId = CurrentLobby.Data["RelayHostId"].Value;
+            }
+            else
+            {
+                throw new Exception("Current lobby data did not contain the key 'RelayHostId'.");
+            }
 
             HeartBeatPingManager.Instance.StartKeepAliveTimer();
+
+            var callbacks = LobbyCallBackManager.Instance.GetLobbyEventCallbacks();
+            lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(CurrentLobby.Id, callbacks);
+
             GameManager.Instance.OnlinePlayerIdentity = playerInfo;
 
             return CurrentLobby;
@@ -121,6 +143,7 @@ public class LobbyServiceManager : NetworkBehaviour
     private async Task Authenticate()
     {
         await Authenticate("Player" + UnityEngine.Random.Range(0, 1000));
+        PlayerId = AuthenticationService.Instance.PlayerId;
     }
 
     private async Task Authenticate(string playerName)
@@ -180,5 +203,67 @@ public class LobbyServiceManager : NetworkBehaviour
         GameMenuNavigator.Instance.DisplayBoardCanvas();
 
         GameManager.Instance.StartGame(gameParameters);
+    }
+
+    internal async Task DisconnectFromLobby()
+    {
+        await lobbyEvents.UnsubscribeAsync();
+        lobbyEvents = null;
+
+        HeartBeatPingManager.Instance.UnsubscribeToAll();
+
+        if (CurrentLobby.Players.Count > 1)
+        {
+            if (PlayerId == RelayServiceManager.Instance.HostId)
+            {
+                var newHostId = CurrentLobby.Players.Find(p => p.Id != PlayerId).Id;
+                Debug.Log($"Leaving lobby, transfering host to Player: {newHostId}.");
+
+                var lobbyUpdate = new UpdateLobbyOptions()
+                {
+                    Data = new Dictionary<string, DataObject>()
+                {
+                    { "RelayHostId", new DataObject(DataObject.VisibilityOptions.Member, newHostId) }
+                }
+                };
+
+                await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, lobbyUpdate);
+            }
+
+            await LobbyService.Instance.RemovePlayerAsync(CurrentLobby.Id, PlayerId);
+            NetworkManager.Singleton.Shutdown();
+        }
+        else
+        {
+            Debug.Log("Last player to leave, deleting lobby.");
+            NetworkManager.Singleton.Shutdown();
+            await LobbyService.Instance.DeleteLobbyAsync(CurrentLobby.Id);
+        }
+    }
+
+    internal async Task ChangeHost()
+    {
+        Debug.Log("Starting new Relay server");
+        try
+        {
+            NetworkManager.Singleton.Shutdown();
+            var newJoinCode = await RelayServiceManager.Instance.StartRelayHosting(4);
+
+            Debug.Log($"Updating Lobby with new relay join code: {newJoinCode}");
+            var lobbyUpdate = new UpdateLobbyOptions()
+            {
+                Data = new Dictionary<string, DataObject>()
+            {
+                { "RelayCode", new DataObject(DataObject.VisibilityOptions.Member, newJoinCode) },
+                { "RelayHostId", new DataObject(DataObject.VisibilityOptions.Member, PlayerId) }
+            }
+            };
+
+            await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, lobbyUpdate);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to change host: " + e.Message);
+        }
     }
 }
