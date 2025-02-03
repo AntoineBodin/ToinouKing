@@ -37,10 +37,10 @@ public class LudoPlayer : MonoBehaviour
            
             Token token = SetupToken(newToken, space, canvas, playerIndex * 4 + tokenIndex);
 
-            GameManager.Instance.AddToken(token);
-
             MoveToken(token, space, true);
         }
+
+        GameManager.Instance.AddTokens(tokens);
     }
 
     private Token SetupToken(GameObject newToken, TokenSpace space, GameObject canvas, int id)
