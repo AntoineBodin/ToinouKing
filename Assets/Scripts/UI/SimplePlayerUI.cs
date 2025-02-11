@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts;
 using Assets.Scripts.Helpers;
+using Assets.Scripts.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,5 +33,10 @@ public class SimplePlayerUI : MonoBehaviour
         PlayerAvatarImage.sprite = null;
         PlayerInfo = LudoPlayerInfo.nullInstance;
         gameObject.SetActive(false);
+    }
+
+    public virtual void UpdateColor(Color color)
+    {
+        PlayerNameText.color = color;
     }
 }

@@ -3,9 +3,8 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Dice : NetworkBehaviour
+public class Dice : MonoBehaviour
 {
-    public GameManager GameManager;
     public Animator IdleAnimator;
     public List<Sprite> Sprites;
     public Image DiceFace;
@@ -26,9 +25,9 @@ public class Dice : NetworkBehaviour
 
         if (GameManager.Instance.IsOnline)
         {
-            if (GameManager.IsMyTurn)
+            if (GameManager.Instance.IsMyTurn)
             {
-                Roll_ServerRpc(diceValue);
+                GameManager.Instance.RollDiceOnline(diceValue);
             }
             else
             {
@@ -37,26 +36,14 @@ public class Dice : NetworkBehaviour
         }
         else
         {
-            RollDice(diceValue);
+            SetDiceSprite(diceValue);
+            GameManager.Instance.RollDice();
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void Roll_ServerRpc(int diceValue)
-    {
-        SendResultToGameManager_ClientRpc(diceValue);
-    }
-
-    [ClientRpc]
-    private void SendResultToGameManager_ClientRpc(int value)
-    {
-        RollDice(value);
-    }
-
-    private void RollDice(int diceValue)
+    public void SetDiceSprite(int diceValue)
     {
         SetDiceValueAndSprite(diceValue);
-        GameManager.RollDice();
     }
 
     private int GetDiceRoll()
@@ -64,7 +51,7 @@ public class Dice : NetworkBehaviour
         return Random.Range(1, 7);
     }
 
-    private void SetDiceValueAndSprite(int value)
+    public void SetDiceValueAndSprite(int value)
     {
         Value = value;
         DiceFace.sprite = Sprites[Value - 1];

@@ -26,7 +26,7 @@ namespace Assets.Scripts.Lobbies
         private Lobby currentLobby;
         
         public static HeartBeatPingManager Instance;
-
+        private bool isActive;
 
         private void Awake()
         {
@@ -49,15 +49,19 @@ namespace Assets.Scripts.Lobbies
 
         private void Update()
         {
-            lobbyHeartbeatTimer.Tick(Time.deltaTime);
-            if (NetworkManager.Singleton.IsClient)
+            if (isActive)
             {
-                relayKeepAliveTimer.Tick(Time.deltaTime);
+                lobbyHeartbeatTimer.Tick(Time.deltaTime);
+                if (NetworkManager.Singleton.IsClient)
+                {
+                    relayKeepAliveTimer.Tick(Time.deltaTime);
+                }
             }
         }
 
         public void Setup()
         {
+            isActive = true;
             currentLobby = LobbyServiceManager.Instance.CurrentLobby;
             SetupHeartbeat();
             SetupKeepAlive();
@@ -138,6 +142,8 @@ namespace Assets.Scripts.Lobbies
 
         internal void UnsubscribeToAll()
         {
+            isActive = false;
+
             lobbyHeartbeatTimer.Stop();
             relayKeepAliveTimer.Stop();
 

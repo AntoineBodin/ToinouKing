@@ -17,8 +17,6 @@ public class GameManager : NetworkBehaviour
     public GameObject TokenPrefab;
     public GameObject PlayerPrefab;
     public Dice Dice;
-    public TMP_Text CurrentPlayerText;
-    public GameObject Canvas;
     private List<Token> tokens = new();
 
     private GameParameters gameParameters;
@@ -101,7 +99,8 @@ public class GameManager : NetworkBehaviour
 
         currentPlayerIndex = this.gameParameters.FirstPlayerIndex;
 
-        UpdateCurrentPlayer();
+        UpdateCurrentPlayerWithIndex();
+        UpdateCurrentPlayerDisplay(false);
 
         SwitchToStateStartRound();
     }
@@ -141,7 +140,7 @@ public class GameManager : NetworkBehaviour
         {
             if (!player.IsBlank)
             {
-                player.SpawnTokens(TokenPrefab, Canvas, playerIndex, gameParameters.tokenCount);
+                player.SpawnTokens(TokenPrefab, playerIndex, gameParameters.tokenCount);
             }
             playerIndex++;
         });
@@ -403,7 +402,9 @@ public class GameManager : NetworkBehaviour
         currentPlayerIndex++;
         currentPlayerIndex %= PlayingPlayers.Count;
 
-        UpdateCurrentPlayer();
+        UpdateCurrentPlayerWithIndex();
+
+        UpdateCurrentPlayerDisplay(true);
 
         SwitchToStateStartRound();
     }
@@ -419,6 +420,24 @@ public class GameManager : NetworkBehaviour
         SwitchToStateAutoPlay();
     }
 
+    public void RollDiceOnline(int diceValue)
+    {
+        Roll_ServerRpc(diceValue);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void Roll_ServerRpc(int diceValue)
+    {
+        Roll_ClientRpc(diceValue);
+    }
+
+    [ClientRpc]
+    private void Roll_ClientRpc(int value)
+    {
+        Dice.SetDiceSprite(value);
+        RollDice();
+    }
+
     private void UpdateIdlingTokens(bool isIdling)
     {
         foreach (var playableTokenID in roundInfo.TokensWithNewPosition.Keys)
@@ -427,11 +446,21 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private void UpdateCurrentPlayer()
+    private void UpdateCurrentPlayerWithIndex()
     {
         CurrentPlayer = PlayingPlayers[currentPlayerIndex];
-        CurrentPlayerText.text = CurrentPlayer.Name.ToString();
-        CurrentPlayerText.color = playerParameters[currentPlayerIndex].TokenColor;
+    }
+
+    private void UpdateCurrentPlayerDisplay(bool withAnimation)
+    {
+        if (withAnimation)
+        {
+            InGameUIManager.Instance.UpdateCurrentPlayer(CurrentPlayer);
+        }
+        else
+        {
+            InGameUIManager.Instance.DisplayCurrentPlayer(CurrentPlayer);
+        }
     }
 
     private void SetupLists()
@@ -445,11 +474,6 @@ public class GameManager : NetworkBehaviour
         playerParameters.Add(Player2Parameters);
         playerParameters.Add(Player3Parameters);
         playerParameters.Add(Player4Parameters);
-/*
-        playerTexts.Add(Player1Name);
-        playerTexts.Add(Player2Name);
-        playerTexts.Add(Player3Name);
-        playerTexts.Add(Player4Name);*/
 
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player2UI);
@@ -475,8 +499,8 @@ public class GameManager : NetworkBehaviour
     private void EndGame()
     {
         Players.Find(t => t.CanPlay).Win(winningPlayerIndex);
-        GameMenuNavigator.Instance.DisplayEndGamePanel();
         EndGameUIManager.Instance.UpdateUI(Players);
+        GameMenuNavigator.Instance.DisplayEndGamePannel();
         ResetGame();
     }
 }

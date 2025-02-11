@@ -28,14 +28,14 @@ namespace Assets.Scripts
 
         public GameParameters GetOfflineParameters(List<LudoPlayerInfo> ludoPlayerInfos)
         {
-            if (offlinePrototype == null)
+            if (offlinePrototype != null)
             {
                 var res = Instantiate(offlinePrototype);
 
                 res.Players = ludoPlayerInfos;
                 res.FirstPlayerIndex = UnityEngine.Random.Range(0, ludoPlayerInfos.Count);
 
-                return offlinePrototype;
+                return res;
             }
             else
             {

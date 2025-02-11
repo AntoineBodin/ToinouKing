@@ -118,14 +118,4 @@ public class LobbyCallBackManager : MonoBehaviour
     {
         LobbyUIManager.Instance.UpdateUI();
     }
-
-    private async void OnDestroy()
-    {
-        // Désabonnement des événements
-        /*
-        if (lobbyEvents != null)
-        {
-            await lobbyEvents.UnsubscribeAsync();
-        }*/
-    }
 }
