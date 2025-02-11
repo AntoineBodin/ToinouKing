@@ -14,7 +14,6 @@ public class LobbyUIManager : MonoBehaviour
 {
     [SerializeField] private Button hostJoinButton;
     [SerializeField] private Button startGameButton;
-    [SerializeField] private Button backButton;
     public TMP_InputField joinCodeInputField;
     public TMP_InputField playerName;
     public TMP_Text LobbyCode;
@@ -80,11 +79,6 @@ public class LobbyUIManager : MonoBehaviour
                 Debug.Log("Only host can start the game.");
             }
         });
-
-        backButton.onClick.AddListener(async () => {
-            await LobbyServiceManager.Instance.DisconnectFromLobby();
-            GameMenuNavigator.Instance.DisplayGameMenuCanvas();
-        });
     }
 
     public void UpdateLobbyInfo(Lobby lobby)
@@ -97,8 +91,11 @@ public class LobbyUIManager : MonoBehaviour
         Debug.Log("Creating Lobby...");
 
         LudoPlayerInfo playerInfo = GetPlayerInfo();
+        
+        GameMenuNavigator.Instance.EnableSpinner();
 
         currentLobby = await LobbyServiceManager.Instance.CreateLobbyAsync("New Lobby", 4, playerInfo);
+        
         if (currentLobby != null)
         {
             SwitchToLobbyScreen();
@@ -107,7 +104,7 @@ public class LobbyUIManager : MonoBehaviour
         else
         {
             Debug.LogError("Failed to create lobby.");
-
+            GameMenuNavigator.Instance.DisableSpinner();
         }
     }
 
@@ -121,6 +118,8 @@ public class LobbyUIManager : MonoBehaviour
 
         if (!string.IsNullOrEmpty(joinCode))
         {
+            GameMenuNavigator.Instance.EnableSpinner();
+
             var lobby = await LobbyServiceManager.Instance.JoinLobbyAsync(joinCode, playerInfo);
             
             if (lobby != null)
@@ -132,6 +131,7 @@ public class LobbyUIManager : MonoBehaviour
             else
             {
                 Debug.LogError("Failed to join lobby.");
+                GameMenuNavigator.Instance.DisableSpinner();
             }
         }
         else
@@ -142,7 +142,7 @@ public class LobbyUIManager : MonoBehaviour
 
     private void SwitchToLobbyScreen()
     {
-        GameMenuNavigator.Instance.DisplayLobbyCanvas();
+        GameMenuNavigator.Instance.DisplayLobbyPanel();
         UpdateUI();
     }
 

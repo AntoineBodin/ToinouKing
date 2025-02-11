@@ -9,7 +9,6 @@ public class TokenSpace : MonoBehaviour
     public bool IsFinishLine = false;
     public int Index;
     public List<GameObject> SubSpaces = new();
-    public GameManager GameManager;
 
     public bool IsOccupied { get; internal set; } = false;
 
@@ -23,7 +22,7 @@ public class TokenSpace : MonoBehaviour
         else
         {
             int subSpacesIndex = 0;
-            GameManager.Players.ForEach(p => {
+            GameManager.Instance.Players.ForEach(p => {
                 if (TokensByPlayer.ContainsKey(p)) {
                     SetGroupTransform(TokensByPlayer[p], SubSpaces[subSpacesIndex].transform, subSpacesIndex);
                     subSpacesIndex++;

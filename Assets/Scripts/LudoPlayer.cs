@@ -11,23 +11,24 @@ using UnityEngine;
 
 public class LudoPlayer : MonoBehaviour
 {
+    public PlayerParameter PlayerParameter;
+    public bool IsBlank = false;
+    public LudoPlayerInfo PlayerInfo;
+
     private List<TokenSpace> spawnSpaces;
     private List<TokenSpace> localBoard;
     private List<Token> tokens;
-    private PlayerParameter playerParameter;
-    public LudoPlayerInfo PlayerInfo;
     private SimplePlayerUI inGamePlayerUI;
     private TokenSpace startSpace;
-    public bool IsBlank = false;
     private bool hasWon = false;
     public bool CanPlay => !IsBlank && !hasWon;
     public int Rank => PlayerInfo.Rank;
     public FixedString64Bytes ID => PlayerInfo.ID;
     public FixedString64Bytes Name => PlayerInfo.Name;
     public bool IsWinningIndex(int index)
-        => playerParameter.WinningSpaceIndex == index;
+        => PlayerParameter.WinningSpaceIndex == index;
 
-    public void SpawnTokens(GameObject tokenPrefab, GameObject canvas, int playerIndex, int tokenCount)
+    public void SpawnTokens(GameObject tokenPrefab, int playerIndex, int tokenCount)
     {
         for (int tokenIndex = 0; tokenIndex  < tokenCount; tokenIndex++) 
         {
@@ -35,7 +36,7 @@ public class LudoPlayer : MonoBehaviour
 
             GameObject newToken = Instantiate(tokenPrefab);
            
-            Token token = SetupToken(newToken, space, canvas, playerIndex * 4 + tokenIndex);
+            Token token = SetupToken(newToken, space, playerIndex * 4 + tokenIndex);
 
             MoveToken(token, space, true);
         }
@@ -43,16 +44,16 @@ public class LudoPlayer : MonoBehaviour
         GameManager.Instance.AddTokens(tokens);
     }
 
-    private Token SetupToken(GameObject newToken, TokenSpace space, GameObject canvas, int id)
+    private Token SetupToken(GameObject newToken, TokenSpace space, int id)
     {
-        newToken.transform.SetParent(canvas.transform);
+        newToken.transform.SetParent(space.transform);
         newToken.transform.position = space.transform.position;
         newToken.transform.localScale = new Vector3(1, 1, 1);
 
         Token token = newToken.GetComponent<Token>();
 
         token.ID = id;
-        token.sprite.color = playerParameter.TokenColor;
+        token.sprite.color = PlayerParameter.TokenColor;
         token.SetPlayer(this);
         tokens.Add(token);
 
@@ -128,7 +129,7 @@ public class LudoPlayer : MonoBehaviour
 
     private void AddTokenToNewSpace(Token token, TokenSpace dest)
     {
-        if (dest.Index == playerParameter.WinningSpaceIndex)
+        if (dest.Index == PlayerParameter.WinningSpaceIndex)
         {
             token.Enter();
             return;
@@ -155,7 +156,7 @@ public class LudoPlayer : MonoBehaviour
     public void SetupLocalBoard()
     {
         var board = new List<TokenSpace>();
-        int index = playerParameter.StartingIndex;
+        int index = PlayerParameter.StartingIndex;
         for (int counter = 0; counter < 51; counter++)
         {
             board.Add(GameManager.Instance.TokenSpaces[index]);
@@ -163,7 +164,7 @@ public class LudoPlayer : MonoBehaviour
             index %= 52;
         }
 
-        for (int counter = playerParameter.StartingIndexAfterHome; counter <= playerParameter.WinningSpaceIndex; counter++)
+        for (int counter = PlayerParameter.StartingIndexAfterHome; counter <= PlayerParameter.WinningSpaceIndex; counter++)
         {
             board.Add(GameManager.Instance.TokenSpaces[counter]);
         }
@@ -237,7 +238,7 @@ public class LudoPlayer : MonoBehaviour
         this.PlayerInfo = playerInfo;
         inGamePlayerUI = playerUI;
         inGamePlayerUI.SetPlayerInfo(playerInfo);
-        this.playerParameter = playerParameter;
+        this.PlayerParameter = playerParameter;
         this.spawnSpaces = spawnSpaces;
         tokens = new List<Token>();
         UpdateUI();
