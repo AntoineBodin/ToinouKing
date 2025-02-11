@@ -200,7 +200,7 @@ public class LobbyServiceManager : NetworkBehaviour
             FirstPlayerIndex = firstPlayerIndex
         };
 
-        GameMenuNavigator.Instance.DisplayBoardCanvas();
+        GameMenuNavigator.Instance.DisplayBoardPanel();
 
         GameManager.Instance.StartGame(gameParameters);
     }

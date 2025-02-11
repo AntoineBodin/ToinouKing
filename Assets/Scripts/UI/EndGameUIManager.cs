@@ -4,10 +4,11 @@ using UnityEngine;
 using System.Linq;
 using TMPro;
 using UnityEngine.UI;
+using Assets.Scripts.UI;
 
 public class EndGameUIManager : MonoBehaviour
 {
-    [SerializeField] private List<SimplePlayerUI> playersUI;
+    [SerializeField] private List<PlayerUIWithRank> playersUI;
 
     [SerializeField] private Button backButton;
     [SerializeField] private TMP_Text backButtonText;
@@ -34,6 +35,7 @@ public class EndGameUIManager : MonoBehaviour
             {
                 playersUI[playerUIIndex].SetPlayerInfo(p.PlayerInfo);
                 playersUI[playerUIIndex].UpdateUI();
+                playersUI[playerUIIndex].UpdateColor(p.PlayerParameter.TokenColor);
                 playerUIIndex++;
             });
         for (int i = playerUIIndex; i < 4; i++)
@@ -44,11 +46,11 @@ public class EndGameUIManager : MonoBehaviour
 
     private void BackToLobbyAction()
     {
-        GameMenuNavigator.Instance.DisplayLobbyCanvas();
+        GameMenuNavigator.Instance.DisplayLobbyPanel();
     }
 
     private void PlayAgainAction()
     {
-        GameMenuNavigator.Instance.DisplayGameMenuCanvas();
+        GameMenuNavigator.Instance.DisplayPlayLocalPanel();
     }
 }

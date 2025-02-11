@@ -33,5 +33,11 @@ namespace Assets.Scripts.UI
             PlayerRankingText.text = null;
             base.Clear();
         }
+
+        public override void UpdateColor(Color color)
+        {
+            PlayerRankingText.color = color;
+            base.UpdateColor(color);
+        }
     }
 }
