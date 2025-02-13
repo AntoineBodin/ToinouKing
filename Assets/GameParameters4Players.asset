@@ -12,13 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15031c54c6b722d47a109917ddbee97c, type: 3}
   m_Name: GameParameters4Players
   m_EditorClassIdentifier: 
-  PlayersInfo:
-  - Avatar: {fileID: 0}
-    Name: Manou
-  - Avatar: {fileID: 0}
-    Name: Antoine
-  - Avatar: {fileID: 0}
-    Name: Louise
-  - Avatar: {fileID: 0}
-    Name: "St\xE9phanie"
-  DefaultAvatar: {fileID: -1332543640790276693, guid: 8668e6ec43727324ca478d6c4691e9fe, type: 3}
+  Players: []
+  FirstPlayerIndex: 0
+  DefaultAvatarID: 0
+  IsOnline: 0
+  tokenCount: 4
