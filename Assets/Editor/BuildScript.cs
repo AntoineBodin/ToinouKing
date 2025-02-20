@@ -4,19 +4,37 @@ using UnityEngine;
 
 public class BuildScript
 {
-    [MenuItem("Tools/Build WebGL")]
-    public static void BuildWebGL()
+    [MenuItem("Tools/Build WebGL for GHPages")]
+    public static void BuildWebGLGithubPages()
     {
-        string buildPath = "Build/WebGL";
-        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
+        BuildWithProfile("GHPages");
+    }
+
+    [MenuItem("Tools/Build WebGL for itch io")]
+    public static void BuildWebGLItchio()
+    {
+        BuildWithProfile("ItchIo");
+    }
+
+    private static void BuildWithProfile(string buildProfileAssetName)
+    {
+        var profile = AssetDatabase.LoadAssetAtPath<BuildProfile>($"Assets/BuildProfiles/{buildProfileAssetName}.asset");
+        if (profile == null)
         {
-            scenes = new[] { "Assets/Scenes/MainGame.unity" }, // Remplace par ta scène principale
-            locationPathName = buildPath,
-            target = BuildTarget.WebGL,
-            options = BuildOptions.None
+            Debug.LogError("Build Profile not found");
+            return;
+        }
+
+        PlayerSettings.WebGL.compressionFormat = profile.compressionFormat;
+
+        BuildPlayerOptions buildOptions = new BuildPlayerOptions
+        {
+            locationPathName = profile.outputPath,
+            target = profile.targetPlatform,
+            scenes = new[] { "Assets/Scenes/MainGame.unity" }
         };
 
-        BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
+        BuildReport report = BuildPipeline.BuildPlayer(buildOptions);
         BuildSummary summary = report.summary;
 
         if (summary.result == BuildResult.Succeeded)

@@ -1,0 +1,44 @@
+name: Deploy WebGL to Itch.io
+
+on:
+  push:
+    branches:
+      - "release/**"
+jobs:
+  build:
+    name: Build my project ✨
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Unity-${{ runner.os }}-${{ hashFiles('**/Assets/**', '**/Packages/**', '**/ProjectSettings/**') }}
+          restore-keys: |
+            Library-Unity-${{ runner.os }}-
+
+      - name: Build Unity Project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: WebGL
+          customParameters: "-executeMethod BuildScript.BuildWebGLItchio"
+
+      - name: Upload to Itch.io
+        uses: robinrenotte/butler-publish-itchio-action@v1.0.3
+        with:
+          itch-api-key: ${{ secrets.ITCH_IO_API_KEY }}
+          itch-user: "AntoineBodin"
+          itch-game: "ToinouKing"
+          build-path: "Builds/WebGL"
+          channel: "webgl"

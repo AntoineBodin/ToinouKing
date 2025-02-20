@@ -9,11 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15031c54c6b722d47a109917ddbee97c, type: 3}
-  m_Name: OnlinePrototype
+  m_Script: {fileID: 11500000, guid: 58df073f47792a94e8a2747f707f3d4d, type: 3}
+  m_Name: ItchIo
   m_EditorClassIdentifier: 
-  Players: []
-  FirstPlayerIndex: 0
-  DefaultAvatarID: 0
-  IsOnline: 1
-  tokenCount: 4
+  outputPath: Builds/WebGL
+  targetPlatform: 20
+  compressionFormat: 0
