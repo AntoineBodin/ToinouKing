@@ -197,7 +197,8 @@ public class LobbyServiceManager : NetworkBehaviour
         {
             Players = players,
             IsOnline = true,
-            FirstPlayerIndex = firstPlayerIndex
+            FirstPlayerIndex = firstPlayerIndex,
+            tokenCount = 4
         };
 
         GameMenuNavigator.Instance.DisplayBoardPanel();
