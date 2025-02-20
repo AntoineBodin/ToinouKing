@@ -35,7 +35,7 @@ jobs:
           customParameters: "-executeMethod BuildScript.BuildWebGLItchio"
 
       - name: Upload to Itch.io
-        uses: robinrenotte/butler-publish-itchio-action@v1.0.3
+        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
         with:
           itch-api-key: ${{ secrets.ITCH_IO_API_KEY }}
           itch-user: "AntoineBodin"
