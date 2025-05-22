@@ -53,7 +53,7 @@ public class GameManager : NetworkBehaviour
 
     private List<List<TokenSpace>> spawnSpaces = new();
     private List<PlayerParameter> playerParameters = new();
-    private List<SimplePlayerUI> playerUIs = new();
+    private List<PlayerUIWithScore> playerUIs = new();
 
     private RoundInfo roundInfo = new();
 
@@ -79,7 +79,8 @@ public class GameManager : NetworkBehaviour
     {
         this.gameParameters = gameParameters;
         playerCount = this.gameParameters.Players.Count;
-        Debug.Log("Start game with " + playerCount + " players");
+
+        //Debug.Log("Start game with " + playerCount + " players");
         if (playerCount == 2)
         {
             SetupListsFor2Players();
@@ -88,6 +89,8 @@ public class GameManager : NetworkBehaviour
         {
             SetupLists();
         }
+
+        playerUIs.ForEach(p => p.OnPlayerTimeToPlayEnd += EndTimer);
 
         for (int i = 0; i < TokenSpaces.Count; i++)
         {
@@ -103,6 +106,27 @@ public class GameManager : NetworkBehaviour
         UpdateCurrentPlayerDisplay(false);
 
         SwitchToStateStartRound();
+    }
+
+    private void EndTimer()
+    {
+        if (CanPlayIfOnline) 
+        { 
+            if (gameState == GameState.WaitingForDice)
+            {
+                Debug.Log("End Timer Rolling Dice");
+                Dice.OnMouseDown();
+            }
+            else if (gameState == GameState.ChoosingToken)
+            {
+                Debug.Log("End Timer Choosing Token");
+                PlayRandomToken();
+            }
+            else
+            {
+                Debug.Log("End Timer in other state: " + gameState);
+            }
+        }
     }
 
     private void CreatePlayers()
@@ -190,7 +214,7 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateStartRound()
     {
-        Debug.Log("Switch to state START_ROUND");
+        //Debug.Log("Switch to state START_ROUND");
         gameState = GameState.StartRound;
         roundInfo.Reset();
         //SaveGameToLobby();
@@ -223,7 +247,9 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateWaitingForDice()
     {
-        Debug.Log("Switch to state WAITING_FOR_DICE : " + OnlinePlayerIdentity.ID);
+        //Debug.Log("Switch to state WAITING_FOR_DICE : " + OnlinePlayerIdentity.ID);
+        Debug.Log("Starting ROLL DICE timer");
+        CurrentPlayer.StartTimer(5f);
         gameState = GameState.WaitingForDice;
         if (IsMyTurn)
         {
@@ -233,7 +259,7 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateAutoPlay()
     {
-        Debug.Log("Switch to state AUTO_PLAY");
+        //Debug.Log("Switch to state AUTO_PLAY");
 
         gameState = GameState.AutoPlay;
         AutoPlay();
@@ -241,7 +267,7 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateChoosingToken() 
     {
-        Debug.Log("Switch to state CHOOSING_TOKEN");
+        //Debug.Log("Switch to state CHOOSING_TOKEN");
 
         gameState = GameState.ChoosingToken;
         if (CanPlayIfOnline)
@@ -252,7 +278,7 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateEndRound()
     {
-        Debug.Log("Switch to state END_ROUND");
+        //Debug.Log("Switch to state END_ROUND");
 
         gameState = GameState.EndRound;
         EndRound();
@@ -260,14 +286,14 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateNextRound()
     {
-        Debug.Log("Switch to state NEXT_ROUND");
+        //Debug.Log("Switch to state NEXT_ROUND");
         gameState = GameState.NextRound;
         NextRound();
     }
 
     private void SwitchToEndGame()
     {
-        Debug.Log("Switch to state END_GAME");
+        //Debug.Log("Switch to state END_GAME");
         gameState = GameState.EndGame;
 
         EndGame();
@@ -278,9 +304,14 @@ public class GameManager : NetworkBehaviour
 
     private void AutoPlay()
     {
+        Debug.Log("Starting PICK TOKEN timer");
+        CurrentPlayer.StartTimer(5f);
+
         roundInfo.TokensWithNewPosition.AddRange(CurrentPlayer.GetTokensNewPositions(Dice.Value));
         if (roundInfo.TokensWithNewPosition.Count == 0)
         {
+            Debug.Log("Reset timer next round in autoplay");
+            CurrentPlayer.ResetTimer();
             SwitchToStateNextRound();
             return;
         }
@@ -295,7 +326,7 @@ public class GameManager : NetworkBehaviour
 
     public void PickToken(int tokenID)
     {
-        Debug.Log("Token chosen: " + tokenID);
+        //Debug.Log("Token chosen: " + tokenID);
         if (gameParameters.IsOnline)
         {
             PickToken_ServerRPC(tokenID);
@@ -324,6 +355,8 @@ public class GameManager : NetworkBehaviour
         {
             return;
         }
+        Debug.Log("Reset timer played token");
+        CurrentPlayer.ResetTimer();
 
         UpdateIdlingTokens(false);
 
@@ -359,6 +392,13 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private void PlayRandomToken()
+    {
+        int keyIndex = UnityEngine.Random.Range(0, roundInfo.TokensWithNewPosition.Keys.Count - 1);
+        int tokenId = roundInfo.TokensWithNewPosition.Keys.ElementAt(keyIndex);
+        PickToken(tokenId);
+    }
+
     private void PlayerWins()
     {
         roundInfo.PlayerWon();
@@ -385,14 +425,14 @@ public class GameManager : NetworkBehaviour
         // Play again
         if (!roundInfo.PlayerHasWon && (Dice.Value == 6 || roundInfo.HasEaten || roundInfo.HasEnteredAToken))
         {
-            Debug.Log("Playing Again");
+            //Debug.Log("Playing Again");
             SwitchToStateStartRound();
         }
 
         // Next Player
         else
         {
-            Debug.Log("Next Turn");
+            //Debug.Log("Next Turn");
             SwitchToStateNextRound();
         }
     }
@@ -411,6 +451,8 @@ public class GameManager : NetworkBehaviour
 
     public void RollDice()
     {
+        Debug.Log("Reset timer rolled dice");
+        CurrentPlayer.ResetTimer();
         if (gameState != GameState.WaitingForDice)
         {
             return;

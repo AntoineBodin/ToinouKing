@@ -1,5 +1,6 @@
 using Assets.Scripts;
 using Assets.Scripts.Helpers;
+using Assets.Scripts.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ public class LudoPlayer : MonoBehaviour
     private List<TokenSpace> spawnSpaces;
     private List<TokenSpace> localBoard;
     private List<Token> tokens;
-    private SimplePlayerUI inGamePlayerUI;
+    private PlayerUIWithScore inGamePlayerUI;
     private TokenSpace startSpace;
     private bool hasWon = false;
     public bool CanPlay => !IsBlank && !hasWon;
@@ -185,8 +186,6 @@ public class LudoPlayer : MonoBehaviour
             }
         });
 
-        Debug.Log("Found " +  res.Count + " tokens to play");
-
         return res;
     }
 
@@ -233,7 +232,7 @@ public class LudoPlayer : MonoBehaviour
         inGamePlayerUI.UpdateUI();
     }
 
-    internal void Setup(LudoPlayerInfo playerInfo, SimplePlayerUI playerUI, PlayerParameter playerParameter, List<TokenSpace> spawnSpaces)
+    internal void Setup(LudoPlayerInfo playerInfo, PlayerUIWithScore playerUI, PlayerParameter playerParameter, List<TokenSpace> spawnSpaces)
     {
         this.PlayerInfo = playerInfo;
         inGamePlayerUI = playerUI;
@@ -243,12 +242,21 @@ public class LudoPlayer : MonoBehaviour
         tokens = new List<Token>();
         UpdateUI();
     }
-
     public void Win(int rank)
     {
         hasWon = true;
         var localPlayerInfo = PlayerInfo;
         localPlayerInfo.Rank = rank;
         PlayerInfo = localPlayerInfo;
+    }
+
+    public void StartTimer(float duration)
+    {
+        inGamePlayerUI.StartTimer(duration);
+    }
+
+    public void ResetTimer()
+    {
+        inGamePlayerUI.ResetTimer();
     }
 }

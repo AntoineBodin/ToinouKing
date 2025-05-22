@@ -17,11 +17,9 @@ public class Dice : MonoBehaviour
         Collider.enabled = isIdling;
     }
 
-    private void OnMouseDown()
+    public void OnMouseDown()
     {
         int diceValue = GetDiceRoll();
-
-        Debug.Log("Dice value: " + diceValue);
 
         if (GameManager.Instance.IsOnline)
         {
