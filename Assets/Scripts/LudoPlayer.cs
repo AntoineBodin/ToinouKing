@@ -1,13 +1,17 @@
 using Assets.Scripts;
 using Assets.Scripts.Helpers;
 using Assets.Scripts.UI;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using Unity.Collections;
+using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class LudoPlayer : MonoBehaviour
@@ -39,7 +43,7 @@ public class LudoPlayer : MonoBehaviour
            
             Token token = SetupToken(newToken, space, playerIndex * 4 + tokenIndex);
 
-            MoveToken(token, space, true);
+            MoveToken(token, space);
         }
 
         GameManager.Instance.AddTokens(tokens);
@@ -61,56 +65,46 @@ public class LudoPlayer : MonoBehaviour
         return token;
     }
 
-    private void PlayToken(Token token, int diceValue)
+    public async Task MoveToken(Token token, TokenSpace dest)
     {
-        int currentPositionIndex = token.currentPosition.Index;
-        int newPositionIndex = currentPositionIndex + diceValue;
-        if (newPositionIndex < localBoard.Count)
-        {
-            for(int i = 0; i < diceValue - 1; i++)
-            {
-                MoveToken(token, localBoard[currentPositionIndex + i], false);
-            }
-            MoveToken(token, localBoard[currentPositionIndex + diceValue - 1], true);
-        }
-        else
-        {
-            // out !
-        }
-    }
+        var currentSpace = token.currentPosition;
+        var currentPosIndex = localBoard.IndexOf(currentSpace);
+        var destIndex = localBoard.IndexOf(dest);
 
-    public void MoveToken(Token token, TokenSpace dest, bool isLastMove)
-    {
+        await AnimateMove(token, currentPosIndex, destIndex);
+        
         RemoveTokenFromOldSpace(token);
-
-        //ANIMATION 
-        //AnimateMove(token, dest.transform.position);
-
         AddTokenToNewSpace(token, dest);
+        
+        dest.UpdateTokenSpaceDisplay();
+    }
 
-        if (isLastMove)
+    private async Task AnimateMove(Token token, int currentPosIndex, int destIndex)
+    {
+        for (int i = currentPosIndex + 1; i <= destIndex; i++)
         {
-            dest.UpdateTokenSpaceDisplay();
+            await JumpOnce(token, localBoard[i].transform.position);
         }
     }
 
-    private IEnumerator AnimateMove(Token token,Vector2 destPosition)
+    private async Task JumpOnce(Token token, Vector3 endPos)
     {
-        int moveSpeed = 1;
 
-        Vector2 startPosition = token.transform.position;
+        await Task.Yield();
 
-        float elapsed = 0f;
+        //Tween tween = 
+        await token.transform.DOJump(endPos, 1, 1, 0.2f).AsyncWaitForCompletion();
 
-        while (elapsed < 1f) 
-        { 
-            token.transform.position = Vector2.Lerp(startPosition, destPosition, elapsed);
-            elapsed += Time.deltaTime * moveSpeed;
+        //await tween.AsyncWaitForCompletion();
+    }
 
-            yield return null;
+    private IEnumerator AnimateMoveToken(Token token, int currentPosIndex, int destIndex)
+    {
+        for (int i = currentPosIndex + 1; i <= destIndex; i++)
+        {
+            yield return token.transform.DOJump(localBoard[i].transform.position, 1, 1, 0.5f).WaitForCompletion();
+            //yield return token.transform.DOJump(localBoard[i].transform.position, 1, 1, 0.5f).WaitForCompletion();
         }
-
-        // reset newPos UI
     }
 
     private void RemoveTokenFromOldSpace(Token token)
@@ -141,11 +135,10 @@ public class LudoPlayer : MonoBehaviour
         dest.IsOccupied = true;
     }
 
-    internal void MoveTokenToHouse(Token eatenToken)
+    internal async Task MoveTokenToHouse(Token eatenToken)
     {
-        TokenSpace currentTokenSpace = eatenToken.currentPosition;
         TokenSpace availableSpawnSpace = FindAvailableSpawnSpace();
-        MoveToken(eatenToken, availableSpawnSpace, true);
+        await MoveToken(eatenToken, availableSpawnSpace);
         eatenToken.IsInHouse = true;
     }
 
