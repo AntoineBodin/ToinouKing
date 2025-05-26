@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies;
@@ -349,7 +350,7 @@ public class GameManager : NetworkBehaviour
         PlayToken(tokenID);
     }
 
-    private void PlayToken(int tokenID)
+    private async void PlayToken(int tokenID)
     {
         if (gameState != GameState.ChoosingToken)
         {
@@ -362,18 +363,21 @@ public class GameManager : NetworkBehaviour
 
         TokenSpace newPosition = roundInfo.TokensWithNewPosition[tokenID];
 
+        Token tokenToEat = null;
         if (!newPosition.IsSafe)
         {
-            Token tokenToEat = null;
             LudoPlayer foundPlayer = newPosition.TokensByPlayer.Keys.FirstOrDefault();
             if (foundPlayer != null)
             {
                 tokenToEat = newPosition.TokensByPlayer[foundPlayer].FirstOrDefault();
             }
-
-            EatToken(tokenToEat);
         }
-        CurrentPlayer.MoveToken(tokens.Find(t => t.ID == tokenID), newPosition, true);
+        await CurrentPlayer.MoveToken(tokens.Find(t => t.ID == tokenID), newPosition);
+
+        if (tokenToEat != null)
+        {
+            await EatToken(tokenToEat);
+        }
 
         if (CurrentPlayer.IsWinningIndex(newPosition.Index))
         {
@@ -410,14 +414,14 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private void EatToken(Token tokenToEat)
+    private async Task EatToken(Token tokenToEat)
     {
         if (tokenToEat == null)
         {
             return;
         }
         roundInfo.Eat();
-        tokenToEat.player.MoveTokenToHouse(tokenToEat);
+        await tokenToEat.player.MoveTokenToHouse(tokenToEat);
     }
 
     public void EndRound()

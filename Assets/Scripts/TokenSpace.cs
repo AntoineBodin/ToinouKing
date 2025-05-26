@@ -23,7 +23,7 @@ public class TokenSpace : MonoBehaviour
         {
             int subSpacesIndex = 0;
             GameManager.Instance.Players.ForEach(p => {
-                if (TokensByPlayer.ContainsKey(p)) {
+                if (TokensByPlayer.ContainsKey(p) && SubSpaces.Count > 0) {
                     SetGroupTransform(TokensByPlayer[p], SubSpaces[subSpacesIndex].transform, subSpacesIndex);
                     subSpacesIndex++;
                 }
