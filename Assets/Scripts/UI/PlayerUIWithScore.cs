@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Authentication;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
@@ -15,10 +17,57 @@ namespace Assets.Scripts.UI
         [SerializeField]
         private TMP_Text PlayerScoreText;
 
+        [SerializeField]
+        private Image PlayerTimeToPlay;
+
+        public event Action OnPlayerTimeToPlayEnd;
+
+        private Coroutine currentCoroutine;
+
         public override void UpdateUI()
         {
             base.UpdateUI();
             UpdateScore();
+        }
+
+        public void StartTimer(float timeToPlay)
+        {
+            Debug.Log("\tStart timer");
+            if (currentCoroutine != null)
+            {
+                StopCoroutine(currentCoroutine);
+            }
+
+            currentCoroutine = StartCoroutine(CooldownRoutine(timeToPlay));
+        }
+
+        public void ResetTimer()
+        {
+            Debug.Log("\tStop timer");
+            if (currentCoroutine != null)
+            {
+                StopCoroutine(currentCoroutine);
+                currentCoroutine = null;
+            }
+
+            PlayerTimeToPlay.fillAmount = 0f;
+        }
+
+        private IEnumerator CooldownRoutine(float duration)
+        {
+            PlayerTimeToPlay.fillAmount = 1f;
+
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                PlayerTimeToPlay.fillAmount = 1f - (elapsed / duration);
+                yield return null;
+            }
+            currentCoroutine = null;
+            PlayerTimeToPlay.fillAmount = 0f;
+            OnPlayerTimeToPlayEnd.Invoke();
         }
 
         private void UpdateScore()
@@ -32,6 +81,7 @@ namespace Assets.Scripts.UI
         public override void Clear()
         {
             PlayerScoreText.text = null;
+            PlayerNameText.text = null;
             base.Clear();
         }
     }
