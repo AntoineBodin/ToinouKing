@@ -81,6 +81,7 @@ namespace Assets.Scripts.UI
         public override void Clear()
         {
             PlayerScoreText.text = null;
+            PlayerNameText.text = null;
             base.Clear();
         }
     }

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class SimplePlayerUI : MonoBehaviour
 {
     [SerializeField]
-    private TMP_Text PlayerNameText;
+    protected TMP_Text PlayerNameText;
 
     [SerializeField]
     private Image PlayerAvatarImage;
