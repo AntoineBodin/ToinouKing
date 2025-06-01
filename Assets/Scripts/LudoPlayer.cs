@@ -53,7 +53,12 @@ public class LudoPlayer : MonoBehaviour
     {
         newToken.transform.SetParent(space.transform);
         newToken.transform.position = space.transform.position;
-        newToken.transform.localScale = new Vector3(1, 1, 1);
+
+        GameObject board = GameObject.FindGameObjectWithTag("Board");
+        float height = board.GetComponent<RectTransform>().rect.height;
+        float scale = height * 0.0045f - 0.215f;
+
+        newToken.transform.localScale = new Vector3(scale, scale, scale);
 
         Token token = newToken.GetComponent<Token>();
 
@@ -235,6 +240,7 @@ public class LudoPlayer : MonoBehaviour
         tokens = new List<Token>();
         UpdateUI();
     }
+    
     public void Win(int rank)
     {
         hasWon = true;
@@ -251,5 +257,14 @@ public class LudoPlayer : MonoBehaviour
     public void ResetTimer()
     {
         inGamePlayerUI.ResetTimer();
+    }
+
+    public void ResetTokenSize()
+    {
+        tokens.ForEach(t =>
+        {
+            float scale = GameObject.FindGameObjectWithTag("Board").GetComponent<RectTransform>().rect.height * 0.0045f - 0.215f;
+            t.transform.localScale = new Vector3(scale, scale, scale);
+        });
     }
 }

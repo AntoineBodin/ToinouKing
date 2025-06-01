@@ -71,9 +71,17 @@ public class GameManager : NetworkBehaviour
 
     #region SETUP
 
-    private void Start()
+    private void Awake()
     {
         Instance = this;
+    }
+
+    private void Start()
+    {
+        BoardSizeWatcher.Instance.OnResolutoinChanged += () =>
+        {
+            Players.ForEach(p => p.ResetTokenSize());
+        };
     }
 
     internal void StartGame(GameParameters gameParameters)
