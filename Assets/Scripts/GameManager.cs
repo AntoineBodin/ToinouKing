@@ -258,7 +258,7 @@ public class GameManager : NetworkBehaviour
     {
         //Debug.Log("Switch to state WAITING_FOR_DICE : " + OnlinePlayerIdentity.ID);
         Debug.Log("Starting ROLL DICE timer");
-        CurrentPlayer.StartTimer(5f);
+        CurrentPlayer.StartTimer();
         gameState = GameState.WaitingForDice;
         if (IsMyTurn)
         {
@@ -314,7 +314,7 @@ public class GameManager : NetworkBehaviour
     private void AutoPlay()
     {
         Debug.Log("Starting PICK TOKEN timer");
-        CurrentPlayer.StartTimer(5f);
+        CurrentPlayer.StartTimer();
 
         roundInfo.TokensWithNewPosition.AddRange(CurrentPlayer.GetTokensNewPositions(Dice.Value));
         if (roundInfo.TokensWithNewPosition.Count == 0)

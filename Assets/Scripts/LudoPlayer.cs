@@ -249,9 +249,9 @@ public class LudoPlayer : MonoBehaviour
         PlayerInfo = localPlayerInfo;
     }
 
-    public void StartTimer(float duration)
+    public void StartTimer()
     {
-        inGamePlayerUI.StartTimer(duration);
+        inGamePlayerUI.StartTimer();
     }
 
     public void ResetTimer()
