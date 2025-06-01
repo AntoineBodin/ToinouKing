@@ -14,6 +14,10 @@ namespace Assets.Scripts.UI
     public class PlayerUIWithScore : SimplePlayerUI
     {
 
+        private const float LONG_TIME_TO_PLAY = 20f;
+        private const float SHORT_TIME_TO_PLAY = 5f;
+        private bool isAFK = false;
+
         [SerializeField]
         private TMP_Text PlayerScoreText;
 
@@ -30,8 +34,10 @@ namespace Assets.Scripts.UI
             UpdateScore();
         }
 
-        public void StartTimer(float timeToPlay)
+        public void StartTimer()
         {
+            float timeToPlay = GetTimeToPlay();
+
             Debug.Log("\tStart timer");
             if (currentCoroutine != null)
             {
@@ -51,6 +57,7 @@ namespace Assets.Scripts.UI
             }
 
             PlayerTimeToPlay.fillAmount = 0f;
+            isAFK = false;
         }
 
         private IEnumerator CooldownRoutine(float duration)
@@ -68,7 +75,10 @@ namespace Assets.Scripts.UI
             currentCoroutine = null;
             PlayerTimeToPlay.fillAmount = 0f;
             OnPlayerTimeToPlayEnd.Invoke();
+            isAFK = true;
         }
+
+        private float GetTimeToPlay() => isAFK ? SHORT_TIME_TO_PLAY : LONG_TIME_TO_PLAY;
 
         private void UpdateScore()
         {
