@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 12, y: 15}
+  m_SizeDelta: {x: 24, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1980149184564368229
 CanvasRenderer:
@@ -89,7 +89,7 @@ SpriteRenderer:
   m_SortingLayerID: 1325529093
   m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7101766174369284686, guid: 1709adefa4b38d745ae5fff7db9e0b2b, type: 3}
+  m_Sprite: {fileID: -2167470508978060100, guid: 92f341c61a5c6ba4eb241fabf6d0fa3f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

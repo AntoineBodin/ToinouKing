@@ -32,7 +32,6 @@ public class LobbyServiceManager : NetworkBehaviour
         }
     }
 
-    // Créer un lobby et stocker le code Relay
     public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, LudoPlayerInfo playerInfo)
     {
         try
@@ -45,16 +44,13 @@ public class LobbyServiceManager : NetworkBehaviour
                 Player = playerInfo.GetPlayerData()
             };
 
-            // Créer le lobby
             CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
 
             HeartBeatPingManager.Instance.Setup();
 
-            // Créer une allocation Relay
             var relayCode = await RelayServiceManager.Instance.StartRelayHosting(maxPlayers);
             RelayServiceManager.Instance.HostId = PlayerId;
 
-            // Stocker le code Relay dans les données du lobby
             var relayData = new UpdateLobbyOptions()
             {
                 Data = new Dictionary<string, DataObject>()
@@ -64,7 +60,6 @@ public class LobbyServiceManager : NetworkBehaviour
                 }
             };
 
-            // Ajouter le code Relay dans les données du lobby
             await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, relayData);
 
             Debug.Log($"Lobby created with ID: {CurrentLobby.Id} and Relay Code: {relayCode}");
@@ -85,7 +80,6 @@ public class LobbyServiceManager : NetworkBehaviour
         }
     }
 
-    // Rejoindre un lobby existant avec un code Relay
     public async Task<Lobby> JoinLobbyAsync(string joinCode, LudoPlayerInfo playerInfo)
     {
         try
@@ -166,7 +160,6 @@ public class LobbyServiceManager : NetworkBehaviour
         }
     }
 
-
     public void StartGame()
     {
         if (NetworkManager.Singleton.IsHost)
@@ -208,6 +201,7 @@ public class LobbyServiceManager : NetworkBehaviour
 
     internal async Task DisconnectFromLobby()
     {
+        if (CurrentLobby == null) return;
         await lobbyEvents.UnsubscribeAsync();
         lobbyEvents = null;
 
@@ -232,14 +226,14 @@ public class LobbyServiceManager : NetworkBehaviour
             }
 
             await LobbyService.Instance.RemovePlayerAsync(CurrentLobby.Id, PlayerId);
-            NetworkManager.Singleton.Shutdown();
         }
         else
         {
             Debug.Log("Last player to leave, deleting lobby.");
-            NetworkManager.Singleton.Shutdown();
             await LobbyService.Instance.DeleteLobbyAsync(CurrentLobby.Id);
         }
+        CurrentLobby = null;
+        NetworkManager.Singleton.Shutdown();
     }
 
     internal async Task ChangeHost()
