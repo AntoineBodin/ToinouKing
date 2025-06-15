@@ -3,6 +3,7 @@ using Assets.Scripts.DataStructures;
 using Assets.Scripts.UI;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -82,6 +83,15 @@ public class GameManager : NetworkBehaviour
         {
             Players.ForEach(p => p.ResetTokenSize());
         };
+
+        Dice.OnDiceRollEnd += RollDice;
+        Dice.OnDiceRollStarts += () =>
+        {
+            if (gameState == GameState.WaitingForDice)
+            {
+                CurrentPlayer.ResetTimer();
+            }
+        };
     }
 
     internal void StartGame(GameParameters gameParameters)
@@ -107,7 +117,7 @@ public class GameManager : NetworkBehaviour
         }
 
         CreatePlayers();
-        SpawnTokens();
+        StartCoroutine(SpawnTokensCoroutine());
 
         currentPlayerIndex = this.gameParameters.FirstPlayerIndex;
 
@@ -160,23 +170,23 @@ public class GameManager : NetworkBehaviour
         LudoPlayer player = playerObject.GetComponent<LudoPlayer>();
 
         player.Setup(playerInfo, playerUIs[playerIndex], playerParameters[playerIndex], spawnSpaces[playerIndex]);
-        
         player.SetupLocalBoard();
 
         return player;
     }
 
-    private void SpawnTokens()
+    private IEnumerator SpawnTokensCoroutine()
     {
         int playerIndex = 0;
-        Players.ForEach(player =>
+        foreach (var player in Players)
         {
             if (!player.IsBlank)
             {
-                player.SpawnTokens(TokenPrefab, playerIndex, gameParameters.tokenCount);
+                StartCoroutine(player.SpawnTokensCoroutine(TokenPrefab, playerIndex, gameParameters.tokenCount));
+                yield return new WaitForSeconds(1f);
             }
             playerIndex++;
-        });
+        }
     }
 
     public void AddTokens(List<Token> newTokens)
@@ -191,6 +201,10 @@ public class GameManager : NetworkBehaviour
         tokens.ForEach(t => Destroy(t.gameObject));
         tokens.Clear();
         Players.Clear();
+        Player1UI.gameObject.SetActive(false);
+        Player2UI.gameObject.SetActive(false);
+        Player3UI.gameObject.SetActive(false);
+        Player4UI.gameObject.SetActive(false);
         playerUIs.Clear();
         playerParameters.Clear();
         spawnSpaces.Clear();
@@ -488,8 +502,9 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void Roll_ClientRpc(int value)
     {
-        Dice.SetDiceSprite(value);
-        RollDice();
+        //Dice.SetDiceSprite(value);
+        Dice.AnimateRoll(value);
+        //RollDice();
     }
 
     private void UpdateIdlingTokens(bool isIdling)
@@ -529,6 +544,11 @@ public class GameManager : NetworkBehaviour
         playerParameters.Add(Player3Parameters);
         playerParameters.Add(Player4Parameters);
 
+        Player1UI.gameObject.SetActive(true);
+        Player2UI.gameObject.SetActive(true);
+        Player3UI.gameObject.SetActive(true);
+        Player4UI.gameObject.SetActive(true);
+
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player2UI);
         playerUIs.Add(Player3UI);
@@ -542,10 +562,9 @@ public class GameManager : NetworkBehaviour
 
         playerParameters.Add(Player1Parameters);
         playerParameters.Add(Player3Parameters);
-/*
-        playerTexts.Add(Player1Name);
-        playerTexts.Add(Player3Name);*/
-
+ 
+        Player2UI.gameObject.SetActive(true);
+        Player4UI.gameObject.SetActive(true);
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player3UI);
     }

@@ -1,6 +1,8 @@
 using Assets.Scripts;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
@@ -9,41 +11,30 @@ using UnityEngine.UI;
 
 public class GameMenuNavigator : MonoBehaviour
 {
-
-    [Header("Panels")]
-    public UIPanelAnimationManager Panel_Landing;
-    public UIPanelAnimationManager Panel_Play;
-    public UIPanelAnimationManager Panel_Play_Local;
-    public UIPanelAnimationManager Panel_Play_Online;
-    public UIPanelAnimationManager Panel_Lobby;
-    public UIPanelAnimationManager Panel_Board;
-    public UIPanelAnimationManager Panel_EndGame;
-    private UIPanelAnimationManager currentPanel;
-    private Action pannelToGoBackTo;
+    [Header("Offline Elements")]
+    public Transform PlayersRow1;
+    public Transform PlayersRow2;
+    public GameObject Player1;
+    public GameObject Player2;
+    public GameObject Player3;
+    public GameObject Player4;
+    public GameObject AddPlayerPlaceHolder;
+    public Button PlayOfflineButton;
+    private Button AddPlayerButton, RemovePlayer3Button, RemovePlayer4Button;
+    private TMP_InputField Player1NameInputField, Player2NameInputField, Player3NameInputField, Player4NameInputField;
 
     [Header("Buttons")]
     public Button PlayButton;
-    public Button PlayLocalButton;
-    public Button PlayOnlineButton;
-    public Button StartGameOnlineButton;
-    public Button StartGameOfflineButton;
-    public Button HeaderBackButton;
-
-    [Header("Toggles")]
-    public Toggle PlayWith2PlayersToggle;
-    public Toggle PlayWith3PlayersToggle;
-    public Toggle PlayWith4PlayersToggle;
-
-    [Header("InputFields")]
-    public TMP_InputField Player1NameInputField;
-    public TMP_InputField Player2NameInputField;
-    public TMP_InputField Player3NameInputField;
-    public TMP_InputField Player4NameInputField;
+    public Button BackButton;
 
     [Header("Elements")]
     public GameObject Spinner;
 
+    [Header("Switches")]
+    public Slider OnlineLocalSwitch;
+    public Animator PlayPanelAnimator;
 
+    public static event Action<bool> OnOnlineLocalSwitched;
     public static GameMenuNavigator Instance;
 
     private void Awake()
@@ -60,190 +51,169 @@ public class GameMenuNavigator : MonoBehaviour
 
     private void Start()
     {
-        currentPanel = Panel_Landing;
         SetupButtons();
-        SetupToggles();
-        SetupInputFieldsListeners();
+        SetupOfflineInputFields();
+        OnlineLocalSwitch.onValueChanged.AddListener((i) =>
+        {
+            PlayPanelAnimator.SetTrigger("Switch");
+            PlayPanelAnimator.SetBool("PlayedOnline", false);
+
+            if (i == 0)
+            {
+                OnOnlineLocalSwitched?.Invoke(false);
+            }
+            else if (i == 1)
+            {
+                OnOnlineLocalSwitched?.Invoke(true);
+            }
+            else
+            {
+                Debug.LogError("Invalid value for OnlineLocalSwitch: " + i);
+            }
+        });
+    }
+
+    public void DeletePlayer3()
+    {
+        Player3NameInputField.text = string.Empty;
+        Player3.SetActive(false);
+
+        if (AddPlayerPlaceHolder.activeSelf == false)
+        {
+            AddPlayerPlaceHolder.SetActive(true);
+        }
+
+        SetStartOfflineButtonInteractable();
+    }
+
+    public void DeletePlayer4()
+    {
+        Player4NameInputField.text = string.Empty;
+        Player4.SetActive(false);
+
+        if (AddPlayerPlaceHolder.activeSelf == false)
+        {
+            AddPlayerPlaceHolder.SetActive(true);
+        }
+        
+        SetStartOfflineButtonInteractable();
+    }
+
+    private void AddPlayer()
+    {
+        if (Player3.activeSelf && Player4.activeSelf)
+        {
+            Debug.LogWarning("Cannot add more players, already at maximum.");
+            return;
+        }
+        if (!Player3.activeSelf)
+        {
+            Player3.SetActive(true);
+            Player3NameInputField.text = string.Empty;
+        }
+        else if (!Player4.activeSelf)
+        {
+            Player4.SetActive(true);
+            Player4NameInputField.text = string.Empty;
+        }
+
+        if (Player3.activeSelf && Player4.activeSelf)
+        {
+            AddPlayerPlaceHolder.SetActive(false);
+        }
+
+        SetStartOfflineButtonInteractable();
+    }
+
+    public void DisplayBoardPanel()
+    {
+        BackButton.gameObject.SetActive(false);
+        PlayPanelAnimator.SetTrigger("SwitchToBoard");
     }
 
     #region BUTTONS
 
     private void SetupButtons()
     {
-        PlayButton.onClick.AddListener(DisplayPlayPanel);
-        PlayLocalButton.onClick.AddListener(DisplayPlayLocalPanel);
-        PlayOnlineButton.onClick.AddListener(DisplayPlayOnlinePanel);
-        HeaderBackButton.onClick.AddListener(DisplayPanelToGoBackTo);
-        StartGameOfflineButton.onClick.AddListener(StartGameOffline);
+        AddPlayerButton = AddPlayerPlaceHolder.GetComponentInChildren<Button>();
+        RemovePlayer3Button = Player3.GetComponentInChildren<Button>(true);
+        RemovePlayer4Button = Player4.GetComponentInChildren<Button>(true);
+
+        RemovePlayer3Button.onClick.AddListener(DeletePlayer3);
+        RemovePlayer4Button.onClick.AddListener(DeletePlayer4);
+        AddPlayerButton.onClick.AddListener(AddPlayer);
+        BackButton.onClick.AddListener(async () => await BackButtonAction());
+        PlayOfflineButton.onClick.AddListener(StartGameOffline);
+        PlayButton.onClick.AddListener(StartUpGameScreen);
+
+    }
+    private void StartUpGameScreen()
+    {
+        PlayPanelAnimator.SetTrigger("Start");
+        BackButton.gameObject.SetActive(true);
     }
 
-    private void DisplayLandingPanel()
+    private async Task BackButtonAction()
     {
-        currentPanel.HidePanel();
-        Panel_Landing.ShowPanel();
-        currentPanel = Panel_Landing;
-        HeaderBackButton.gameObject.SetActive(false);
-        pannelToGoBackTo = null;
-    }
-
-    private void DisplayPlayPanel()
-    {
-        currentPanel.HidePanel();
-        Panel_Play.ShowPanel();
-        currentPanel = Panel_Play;
-        pannelToGoBackTo = DisplayLandingPanel;
-        HeaderBackButton.gameObject.SetActive(true);
-    }
-
-    public void DisplayPlayLocalPanel()
-    {
-        currentPanel.HidePanel();
-        Panel_Play_Local.ShowPanel();
-        currentPanel = Panel_Play_Local;
-        pannelToGoBackTo = DisplayPlayPanel;
-        HeaderBackButton.gameObject.SetActive(true);
-    }
-
-    public void DisplayPlayOnlinePanel()
-    {
-        currentPanel.HidePanel();
-        Panel_Play_Online.ShowPanel();
-        currentPanel = Panel_Play_Online;
-        pannelToGoBackTo = DisplayPlayPanel;
-        HeaderBackButton.gameObject.SetActive(true);
-    }
-
-
-    public void DisplayLobbyPanel()
-    {
-        currentPanel.HidePanel();
-        Panel_Lobby.ShowPanel();
-        currentPanel = Panel_Lobby;
-        pannelToGoBackTo = async () => await DisconnectFromLobbyBeforeGoingBack();
-        HeaderBackButton.gameObject.SetActive(true);
-        DisableSpinner();
-    }
-
-    public void DisplayBoardPanel()
-    {
-        currentPanel.HidePanel();
-        Panel_Board.ShowPanel();
-        currentPanel = Panel_Board;
-        HeaderBackButton.gameObject.SetActive(false);
+        await DisconnectFromLobbyBeforeGoingBack();
+        PlayPanelAnimator.SetTrigger("Back");
     }
 
     public void DisplayEndGamePannel()
     {
-        currentPanel.ForceHidePanel();
-        Panel_EndGame.ShowPanel();
-        currentPanel = Panel_EndGame;
-        pannelToGoBackTo = DisplayPlayPanel;
-        HeaderBackButton.gameObject.SetActive(false);
+        PlayPanelAnimator.SetTrigger("SwitchToResults");
+        BackButton.gameObject.SetActive(true);
     }
 
     public async Task DisconnectFromLobbyBeforeGoingBack()
     {
         await LobbyServiceManager.Instance.DisconnectFromLobby();
-        DisplayPlayOnlinePanel();
-    }
-
-    private void DisplayPanelToGoBackTo()
-    {
-        pannelToGoBackTo.Invoke();
+        //DisplayPlayPanel();
     }
 
     private void StartGameOffline()
     {
         DisplayBoardPanel();
+        Debug.Log("Starting offline game with parameters: " + GetOfflineGameParameters());
+        StartCoroutine(StartGameAfter2Seconds());
+    }
+
+    private IEnumerator StartGameAfter2Seconds()
+    {
+        yield return new WaitForSeconds(1f);
         GameManager.Instance.StartGame(GetOfflineGameParameters());
     }
 
     #endregion
 
-    #region TOGGLES
 
-    private void SetupToggles()
+    private void SetupOfflineInputFields()
     {
-        PlayWith2PlayersToggle.onValueChanged.AddListener((bool isOn) =>
-        {
-            if (isOn)
-            {
-                SelectPlayWith2Players();
-            }
-        });
+        Player1NameInputField = Player1.GetComponentInChildren<TMP_InputField>(true);
+        Player2NameInputField = Player2.GetComponentInChildren<TMP_InputField>(true);
+        Player3NameInputField = Player3.GetComponentInChildren<TMP_InputField>(true);
+        Player4NameInputField = Player4.GetComponentInChildren<TMP_InputField>(true);
 
-        PlayWith3PlayersToggle.onValueChanged.AddListener((bool isOn) =>
-        {
-            if (isOn)
-            {
-                SelectPlayWith3Players();
-            }
-        });
-
-        PlayWith4PlayersToggle.onValueChanged.AddListener((bool isOn) =>
-        {
-            if (isOn)
-            {
-                SelectPlayWith4Players();
-            }
-        });
+        Player1NameInputField.onValueChanged.AddListener(_ => SetStartOfflineButtonInteractable());
+        Player2NameInputField.onValueChanged.AddListener(_ => SetStartOfflineButtonInteractable());
+        Player3NameInputField.onValueChanged.AddListener(_ => SetStartOfflineButtonInteractable());
+        Player4NameInputField.onValueChanged.AddListener(_ => SetStartOfflineButtonInteractable());
     }
 
-    private void SelectPlayWith2Players()
+    private void SetStartOfflineButtonInteractable()
     {
-        UnSelect3And4PlayersOptions();
-        Player3NameInputField.interactable = false;
-        Player4NameInputField.interactable = false; 
-    }
+        bool canStartGame = true;
 
-    private void SelectPlayWith3Players()
-    {
-        UnSelect2And4PlayersOptions();
-        Player3NameInputField.interactable = true;
-        Player4NameInputField.interactable = false;
-    }
+        bool canPlayer1Start = !string.IsNullOrEmpty(Player1NameInputField.text);
+        canStartGame &= canPlayer1Start;
+        bool canPlayer2Start = !string.IsNullOrEmpty(Player2NameInputField.text);
+        canStartGame &= canPlayer2Start;
+        bool canPlayer3Start = !Player3.activeSelf || !string.IsNullOrEmpty(Player3NameInputField.text);
+        canStartGame &= canPlayer3Start;
+        bool canPlayer4Start = !Player4.activeSelf || !string.IsNullOrEmpty(Player4NameInputField.text);
+        canStartGame &= canPlayer4Start;
 
-    private void SelectPlayWith4Players()
-    {
-        UnSelect2And3PlayersOptions();
-        Player3NameInputField.interactable = true;
-        Player4NameInputField.interactable = true;
-    }
-
-    private void UnSelect2And3PlayersOptions()
-    {
-        PlayWith2PlayersToggle.isOn = false;
-        PlayWith3PlayersToggle.isOn = false;
-    }
-
-    private void UnSelect3And4PlayersOptions()
-    {
-        PlayWith3PlayersToggle.isOn = false;
-        PlayWith4PlayersToggle.isOn = false;
-    }
-
-    private void UnSelect2And4PlayersOptions()
-    {
-        PlayWith2PlayersToggle.isOn = false;
-        PlayWith4PlayersToggle.isOn = false;
-    }
-
-    #endregion
-
-    private void SetupInputFieldsListeners()
-    {
-        Player1NameInputField.onValueChanged.AddListener(_ => CheckIfEmpty());
-        Player2NameInputField.onValueChanged.AddListener(_ => CheckIfEmpty());
-        Player3NameInputField.onValueChanged.AddListener(_ => CheckIfEmpty());
-        Player4NameInputField.onValueChanged.AddListener(_ => CheckIfEmpty());
-    }
-
-    private void CheckIfEmpty()
-    {
-        StartGameOfflineButton.interactable = !string.IsNullOrEmpty(Player1NameInputField.text)
-                                    && !string.IsNullOrEmpty(Player2NameInputField.text)
-                                    && (!PlayWith3PlayersToggle.isOn || !string.IsNullOrEmpty(Player3NameInputField.text))
-                                    && (!PlayWith4PlayersToggle.isOn || !string.IsNullOrEmpty(Player4NameInputField.text));
+        PlayOfflineButton.interactable = canStartGame;
     }
 
     private GameParameters GetOfflineGameParameters()
@@ -253,65 +223,26 @@ public class GameMenuNavigator : MonoBehaviour
 
     private List<LudoPlayerInfo> GetOfflinePlayerList()
     {
-        if (PlayWith2PlayersToggle.isOn)
+        List<LudoPlayerInfo> playerList = new();
+
+        if (Player1.activeSelf && !string.IsNullOrEmpty(Player1NameInputField.text))
         {
-            return new List<LudoPlayerInfo>()
-            {
-                new()
-                {
-                    Name = Player1NameInputField.text,
-                },
-                new()
-                {
-                    Name = Player2NameInputField.text,
-                }
-            };
+            playerList.Add(new LudoPlayerInfo() { Name = Player1NameInputField.text });
         }
-        else if (PlayWith3PlayersToggle.isOn)
+        if (Player2.activeSelf && !string.IsNullOrEmpty(Player2NameInputField.text))
         {
-            return new List<LudoPlayerInfo>()
-                {
-                new()
-                {
-                    Name = Player1NameInputField.text,
-                },
-                new()
-                {
-                    Name = Player2NameInputField.text,
-                },
-                new()
-                {
-                    Name = Player3NameInputField.text,
-                }
-            };
+            playerList.Add(new LudoPlayerInfo() { Name = Player2NameInputField.text });
         }
-        else if (PlayWith4PlayersToggle.isOn)
+        if (Player3.activeSelf && !string.IsNullOrEmpty(Player3NameInputField.text))
         {
-            return new List<LudoPlayerInfo>()
-                {
-                new()
-                {
-                    Name = Player1NameInputField.text,
-                },
-                new()
-                {
-                    Name = Player2NameInputField.text,
-                },
-                new()
-                {
-                    Name = Player3NameInputField.text,
-                },
-                new()
-                {
-                    Name = Player4NameInputField.text,
-                }
-            };
+            playerList.Add(new LudoPlayerInfo() { Name = Player3NameInputField.text });
         }
-        else
+        if (Player4.activeSelf && !string.IsNullOrEmpty(Player4NameInputField.text))
         {
-            Debug.LogError("No players selected");
-            return new();
+            playerList.Add(new LudoPlayerInfo() { Name = Player4NameInputField.text });
         }
+
+        return playerList; 
     }
 
     public void EnableSpinner()
@@ -322,5 +253,21 @@ public class GameMenuNavigator : MonoBehaviour
     public void DisableSpinner()
     {
         Spinner.SetActive(false);
+    }
+
+    internal void DisplayLobbyPanel()
+    {
+        PlayPanelAnimator.SetTrigger("SwitchToLobby");
+        PlayPanelAnimator.SetBool("PlayedOnline", true);
+    }
+
+    internal void GoBackFromResult()
+    {
+        PlayPanelAnimator.SetTrigger("SwitchBackFromResults");
+    }
+
+    public void ShowPlayer(int playerIndex)
+    {
+        PlayPanelAnimator.SetTrigger($"ShowPlayer{playerIndex + 1}");
     }
 }

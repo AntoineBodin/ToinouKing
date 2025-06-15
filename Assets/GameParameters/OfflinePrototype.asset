@@ -16,4 +16,4 @@ MonoBehaviour:
   FirstPlayerIndex: 0
   DefaultAvatarID: 0
   IsOnline: 0
-  tokenCount: 4
+  tokenCount: 1

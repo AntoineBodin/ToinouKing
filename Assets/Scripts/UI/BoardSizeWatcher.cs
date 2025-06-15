@@ -30,7 +30,7 @@ namespace Assets.Scripts.UI
         {
             float? boardHeight = GameObject.FindGameObjectWithTag("Board")?.GetComponent<RectTransform>().rect.height;
 
-            if (boardHeight != lastHeight)
+            if (boardHeight.HasValue && boardHeight.Value != lastHeight)
             {
                 lastHeight = boardHeight.Value;
                 OnResolutoinChanged?.Invoke();

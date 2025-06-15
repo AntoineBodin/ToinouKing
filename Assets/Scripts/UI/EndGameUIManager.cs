@@ -20,12 +20,15 @@ public class EndGameUIManager : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        backButton.onClick.AddListener(PlayAgainAction);
+    }
+
     public void UpdateUI(List<LudoPlayer> players)
     {
         SetPlayers(players);
-        backButton.onClick.RemoveAllListeners();
         backButtonText.text = GameManager.Instance.IsOnline ? "Back to Lobby" : "Play Again";
-        backButton.onClick.AddListener(GameManager.Instance.IsOnline ? BackToLobbyAction : PlayAgainAction);
     }
 
     private void SetPlayers(List<LudoPlayer> players)
@@ -44,13 +47,8 @@ public class EndGameUIManager : MonoBehaviour
         }
     }
 
-    private void BackToLobbyAction()
-    {
-        GameMenuNavigator.Instance.DisplayLobbyPanel();
-    }
-
     private void PlayAgainAction()
     {
-        GameMenuNavigator.Instance.DisplayPlayLocalPanel();
+        GameMenuNavigator.Instance.GoBackFromResult();
     }
 }
