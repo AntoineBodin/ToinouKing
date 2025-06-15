@@ -15,13 +15,14 @@ public class LobbyUIManager : MonoBehaviour
     [SerializeField] private Button hostJoinButton;
     [SerializeField] private Button startGameButton;
     public TMP_InputField joinCodeInputField;
-    public TMP_InputField playerName;
+    public TMP_InputField playerNameInput;
     public TMP_Text LobbyCode;
 
     private Lobby currentLobby;
     public List<SimplePlayerUI> PlayerLobbyUIs;
 
     public static LobbyUIManager Instance;
+    private TMP_Text buttonText;
 
     private void Awake()
     {
@@ -38,27 +39,17 @@ public class LobbyUIManager : MonoBehaviour
 
     private void Start()
     {
-        var buttonText = hostJoinButton.GetComponentInChildren<TMP_Text>();
+        buttonText = hostJoinButton.GetComponentInChildren<TMP_Text>();
         hostJoinButton.onClick.AddListener(CreateLobby);
-        buttonText.text = "CREATE";
 
-        playerName.onValueChanged.AddListener((value) =>
+        playerNameInput.onValueChanged.AddListener((value) =>
         {
-            hostJoinButton.interactable = !string.IsNullOrEmpty(value);
+            UpdateJoinStartButton();
         });
 
         joinCodeInputField.onValueChanged.AddListener((value) =>
         {
-            buttonText.text = string.IsNullOrEmpty(value) ? "CREATE" : "JOIN";
-            hostJoinButton.onClick.RemoveAllListeners();
-            if (string.IsNullOrEmpty(value))
-            {
-                hostJoinButton.onClick.AddListener(CreateLobby);
-            }
-            else
-            {
-                hostJoinButton.onClick.AddListener(JoinLobby);
-            }
+            UpdateJoinStartButton();
         });
 
         startGameButton.onClick.AddListener(() => {
@@ -79,6 +70,22 @@ public class LobbyUIManager : MonoBehaviour
                 Debug.Log("Only host can start the game.");
             }
         });
+    }
+
+    private void UpdateJoinStartButton()
+    {
+        hostJoinButton.onClick.RemoveAllListeners();
+        hostJoinButton.interactable = !string.IsNullOrEmpty(playerNameInput.text);
+        buttonText.text = "Create";
+        if (!string.IsNullOrEmpty(joinCodeInputField.text))
+        {
+            buttonText.text = "Join";
+            hostJoinButton.onClick.AddListener(JoinLobby);
+        }
+        else
+        {
+            hostJoinButton.onClick.AddListener(CreateLobby);
+        }
     }
 
     public void UpdateLobbyInfo(Lobby lobby)
@@ -104,8 +111,8 @@ public class LobbyUIManager : MonoBehaviour
         else
         {
             Debug.LogError("Failed to create lobby.");
-            GameMenuNavigator.Instance.DisableSpinner();
         }
+        GameMenuNavigator.Instance.DisableSpinner();
     }
 
     public async void JoinLobby()
@@ -131,8 +138,8 @@ public class LobbyUIManager : MonoBehaviour
             else
             {
                 Debug.LogError("Failed to join lobby.");
-                GameMenuNavigator.Instance.DisableSpinner();
             }
+            GameMenuNavigator.Instance.DisableSpinner();
         }
         else
         {
@@ -170,7 +177,7 @@ public class LobbyUIManager : MonoBehaviour
         {
             ID = new(PlayerConfiguration.Instance.GetPlayerID()),
             AvatarID = 0,
-            Name = new(playerName.text)
+            Name = new(playerNameInput.text)
         };
     }
 

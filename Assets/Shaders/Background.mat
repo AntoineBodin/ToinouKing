@@ -45,7 +45,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Blur: 5.84
+    - _Blur: 19.55
     - _ColorMask: 15
     - _Rotation: 0.98
     - _Stencil: 0

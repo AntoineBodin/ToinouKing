@@ -33,27 +33,39 @@ public class LudoPlayer : MonoBehaviour
     public bool IsWinningIndex(int index)
         => PlayerParameter.WinningSpaceIndex == index;
 
-    public void SpawnTokens(GameObject tokenPrefab, int playerIndex, int tokenCount)
+    public IEnumerator SpawnTokensCoroutine(GameObject tokenPrefab, int playerIndex, int tokenCount)
     {
-        for (int tokenIndex = 0; tokenIndex  < tokenCount; tokenIndex++) 
+        for (int tokenIndex = 0; tokenIndex  < tokenCount; tokenIndex++)
         {
-            TokenSpace space = FindAvailableSpawnSpace();
-
-            GameObject newToken = Instantiate(tokenPrefab);
-           
-            Token token = SetupToken(newToken, space, playerIndex * 4 + tokenIndex);
-
-            MoveToken(token, space);
+            SpawnToken(tokenPrefab, playerIndex, tokenIndex);
+            yield return new WaitForSeconds(0.2f);
         }
 
         GameManager.Instance.AddTokens(tokens);
+    }
+
+
+    private void SpawnToken(GameObject tokenPrefab, int playerIndex, int tokenIndex)
+    {
+        TokenSpace space = FindAvailableSpawnSpace();
+
+        GameObject newToken = Instantiate(tokenPrefab);
+
+        Token token = SetupToken(newToken, space, playerIndex * 4 + tokenIndex);
+
+        MoveToken(token, space);
     }
 
     private Token SetupToken(GameObject newToken, TokenSpace space, int id)
     {
         newToken.transform.SetParent(space.transform);
         newToken.transform.position = space.transform.position;
-        newToken.transform.localScale = new Vector3(1, 1, 1);
+
+        GameObject board = GameObject.FindGameObjectWithTag("Board");
+        float height = board.GetComponent<RectTransform>().rect.height;
+        float scale = height * 0.0045f - 0.215f;
+
+        newToken.transform.localScale = new Vector3(scale, scale, scale);
 
         Token token = newToken.GetComponent<Token>();
 
@@ -89,13 +101,9 @@ public class LudoPlayer : MonoBehaviour
 
     private async Task JumpOnce(Token token, Vector3 endPos)
     {
+        //await Task.Yield();
 
-        await Task.Yield();
-
-        //Tween tween = 
-        await token.transform.DOJump(endPos, 1, 1, 0.2f).AsyncWaitForCompletion();
-
-        //await tween.AsyncWaitForCompletion();
+        await token.transform.DOJump(endPos, 10, 1, 0.2f).AsyncWaitForCompletion();
     }
 
     private IEnumerator AnimateMoveToken(Token token, int currentPosIndex, int destIndex)
@@ -234,7 +242,9 @@ public class LudoPlayer : MonoBehaviour
         this.spawnSpaces = spawnSpaces;
         tokens = new List<Token>();
         UpdateUI();
+        playerUI.Show();
     }
+    
     public void Win(int rank)
     {
         hasWon = true;
@@ -243,13 +253,22 @@ public class LudoPlayer : MonoBehaviour
         PlayerInfo = localPlayerInfo;
     }
 
-    public void StartTimer(float duration)
+    public void StartTimer()
     {
-        inGamePlayerUI.StartTimer(duration);
+        inGamePlayerUI.StartTimer();
     }
 
     public void ResetTimer()
     {
         inGamePlayerUI.ResetTimer();
+    }
+
+    public void ResetTokenSize()
+    {
+        tokens.ForEach(t =>
+        {
+            float scale = GameObject.FindGameObjectWithTag("Board").GetComponent<RectTransform>().rect.height * 0.0045f - 0.215f;
+            t.transform.localScale = new Vector3(scale, scale, scale);
+        });
     }
 }
