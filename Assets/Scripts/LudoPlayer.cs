@@ -2,16 +2,11 @@ using Assets.Scripts;
 using Assets.Scripts.Helpers;
 using Assets.Scripts.UI;
 using DG.Tweening;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Unity.Collections;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class LudoPlayer : MonoBehaviour
@@ -83,7 +78,8 @@ public class LudoPlayer : MonoBehaviour
         var currentPosIndex = localBoard.IndexOf(currentSpace);
         var destIndex = localBoard.IndexOf(dest);
 
-        await AnimateMove(token, currentPosIndex, destIndex);
+        if (GameManager.Instance.AnimateTokenMovement)
+            await AnimateMove(token, currentPosIndex, destIndex);
         
         RemoveTokenFromOldSpace(token);
         AddTokenToNewSpace(token, dest);
@@ -104,15 +100,6 @@ public class LudoPlayer : MonoBehaviour
         //await Task.Yield();
 
         await token.transform.DOJump(endPos, 10, 1, 0.2f).AsyncWaitForCompletion();
-    }
-
-    private IEnumerator AnimateMoveToken(Token token, int currentPosIndex, int destIndex)
-    {
-        for (int i = currentPosIndex + 1; i <= destIndex; i++)
-        {
-            yield return token.transform.DOJump(localBoard[i].transform.position, 1, 1, 0.5f).WaitForCompletion();
-            //yield return token.transform.DOJump(localBoard[i].transform.position, 1, 1, 0.5f).WaitForCompletion();
-        }
     }
 
     private void RemoveTokenFromOldSpace(Token token)

@@ -46,8 +46,6 @@ public class Dice : MonoBehaviour
         else
         {
             AnimateRoll(diceValue);
-            //SetDiceValueAndSprite(diceValue);
-            //GameManager.Instance.RollDice();
         }
     }
 
@@ -63,13 +61,15 @@ public class Dice : MonoBehaviour
         float animationTime = 0.5f;
 
         OnDiceRollStarts?.Invoke();
-
-        for (int i = 0; i < nbOfFrames; i++)
+        if (GameManager.Instance.AnimateDice)
         {
-            int randomValue = Random.Range(1, 7);
-            SetDiceSprite(randomValue);
+            for (int i = 0; i < nbOfFrames; i++)
+            {
+                int randomValue = Random.Range(1, 7);
+                SetDiceSprite(randomValue);
 
-            yield return new WaitForSeconds(animationTime / nbOfFrames);
+                yield return new WaitForSeconds(animationTime / nbOfFrames);
+            }
         }
 
         SetDiceValueAndSprite(diceValue);

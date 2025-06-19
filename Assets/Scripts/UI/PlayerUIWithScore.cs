@@ -14,8 +14,8 @@ namespace Assets.Scripts.UI
     public class PlayerUIWithScore : SimplePlayerUI
     {
 
-        private const float LONG_TIME_TO_PLAY = 5f;
-        private const float SHORT_TIME_TO_PLAY = 5f;
+        private const float LONG_TIME_TO_PLAY = 1f;
+        private const float SHORT_TIME_TO_PLAY = 1f;
         private bool isAFK = false;
 
         [SerializeField]
@@ -38,7 +38,6 @@ namespace Assets.Scripts.UI
         {
             float timeToPlay = GetTimeToPlay();
 
-            Debug.Log("\tStart timer");
             if (currentCoroutine != null)
             {
                 StopCoroutine(currentCoroutine);
@@ -49,7 +48,6 @@ namespace Assets.Scripts.UI
 
         public void ResetTimer()
         {
-            Debug.Log("\tStop timer");
             if (currentCoroutine != null)
             {
                 StopCoroutine(currentCoroutine);

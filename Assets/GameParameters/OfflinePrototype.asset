@@ -17,3 +17,5 @@ MonoBehaviour:
   DefaultAvatarID: 0
   IsOnline: 0
   tokenCount: 1
+  animaterDice: 0
+  animateTokenMovement: 0
