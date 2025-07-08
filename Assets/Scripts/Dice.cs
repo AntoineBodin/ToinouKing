@@ -29,6 +29,7 @@ public class Dice : MonoBehaviour
     {
         if (hasPlayed)
             return;
+        hasPlayed = true;
 
         int diceValue = GetDiceRoll();
 
@@ -56,8 +57,7 @@ public class Dice : MonoBehaviour
 
     private IEnumerator DiceRollAnimationCoroutine(int diceValue)
     {
-        hasPlayed = true;
-        int nbOfFrames = 10;
+        int nbOfFrames = 5;
         float animationTime = 0.5f;
 
         OnDiceRollStarts?.Invoke();

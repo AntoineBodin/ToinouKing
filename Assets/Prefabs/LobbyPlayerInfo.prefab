@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.05, y: 0.8}
   m_AnchorMax: {x: 0.95, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -2.5}
+  m_SizeDelta: {x: 0, y: -5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3756056239427113581
 CanvasRenderer:
@@ -144,9 +144,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1054186903204654304, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -5668518402485374812, guid: 751c32fbd03329d4087423d374ba1276, type: 3}
     - target: {fileID: 1863327465047776850, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_Name
       value: LobbyPlayerInfo
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895627948875254049, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895627948875254049, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895627948875254049, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895627948875254049, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3912210953150152791, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_Pivot.x
@@ -237,24 +257,32 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4769835393670305517, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4769835393670305517, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7096272703251511716, guid: 98c7029df5756df4488c50954fe23514, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
+    - target: {fileID: 5151013507267345925, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_Color.b
+      value: 0.70818865
       objectReference: {fileID: 0}
-    - target: {fileID: 7096272703251511716, guid: 98c7029df5756df4488c50954fe23514, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
+    - target: {fileID: 5151013507267345925, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_Color.g
+      value: 0.81042707
       objectReference: {fileID: 0}
-    - target: {fileID: 7096272703251511716, guid: 98c7029df5756df4488c50954fe23514, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
+    - target: {fileID: 5151013507267345925, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_Color.r
+      value: 0.9245283
       objectReference: {fileID: 0}
     - target: {fileID: 7243923998742971666, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_Name
       value: Avatar
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446059155962873570, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_Name
+      value: Background
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -303,4 +331,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerNameText: {fileID: 2854631307628320598}
   PlayerAvatarImage: {fileID: 8487786402927732541}
-  PlayerFrame: {fileID: 0}

@@ -206,11 +206,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1319836737177004900, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_fontSize
-      value: 12.4
+      value: 13.7
       objectReference: {fileID: 0}
     - target: {fileID: 1863327465047776850, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_Name
       value: PlayerInfoWithDelete
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895627948875254049, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895627948875254049, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895627948875254049, guid: 98c7029df5756df4488c50954fe23514, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3912210953150152791, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_Pivot.x
@@ -310,19 +322,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6023203901451956554, guid: 98c7029df5756df4488c50954fe23514, type: 3}
       propertyPath: m_fontSize
-      value: 9.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7096272703251511716, guid: 98c7029df5756df4488c50954fe23514, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7096272703251511716, guid: 98c7029df5756df4488c50954fe23514, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7096272703251511716, guid: 98c7029df5756df4488c50954fe23514, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
+      value: 10.1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

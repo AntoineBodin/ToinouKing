@@ -14,8 +14,8 @@ namespace Assets.Scripts.UI
     public class PlayerUIWithScore : SimplePlayerUI
     {
 
-        private const float LONG_TIME_TO_PLAY = 1f;
-        private const float SHORT_TIME_TO_PLAY = 1f;
+        private const float LONG_TIME_TO_PLAY = 20f;
+        private const float SHORT_TIME_TO_PLAY = 5f;
         private bool isAFK = false;
 
         [SerializeField]

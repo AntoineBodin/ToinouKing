@@ -13,8 +13,7 @@ namespace Assets.Scripts.Lobbies
 {
     internal class HeartBeatPingManager : MonoBehaviour
     {
-        const float k_lobbyhHeartbeatInterval = 20f;
-        const float k_lobbyPollForUpdatesInterval = 65f;
+        const float k_lobbyhHeartbeatInterval = 10f;
         const float k_clientKeepAliveInterval = 8f;
 
         private CountdownTimer lobbyHeartbeatTimer = new CountdownTimer(k_lobbyhHeartbeatInterval);
