@@ -28,7 +28,13 @@ public class LobbyCallBackManager : MonoBehaviour
         callbacks.PlayerJoined += OnPlayerJoined;
         callbacks.PlayerLeft += OnPlayerLeft;
         callbacks.DataChanged += OnDataChanged;
+        //DataRemoved
+        //DataAdded
         callbacks.PlayerDataChanged += OnPlayerDataChanged;
+        //PlayerDataRemoved
+        //PlayerDataAdded
+        //LobbyDeleted
+        //KickedFromLobby
         callbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
 
         return callbacks;

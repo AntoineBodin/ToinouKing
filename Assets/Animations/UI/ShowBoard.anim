@@ -316,7 +316,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_AnchoredPosition.y
-    path: EndGameElements
+    path: EndGameElements_1
     classID: 224
     script: {fileID: 0}
     flags: 0
@@ -383,7 +383,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2565950142
+      path: 3245072407
       attribute: 538195251
       script: {fileID: 0}
       typeID: 224
@@ -721,7 +721,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_AnchoredPosition.y
-    path: EndGameElements
+    path: EndGameElements_1
     classID: 224
     script: {fileID: 0}
     flags: 0

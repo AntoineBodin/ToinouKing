@@ -1,4 +1,5 @@
 using Assets.Scripts;
+using Assets.Scripts.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ public class GameMenuNavigator : MonoBehaviour
             {
                 Debug.LogError("Invalid value for OnlineLocalSwitch: " + i);
             }
-        });
+        }); 
     }
 
     public void DeletePlayer3()
@@ -174,7 +175,6 @@ public class GameMenuNavigator : MonoBehaviour
     private void StartGameOffline()
     {
         DisplayBoardPanel();
-        Debug.Log("Starting offline game with parameters: " + GetOfflineGameParameters());
         StartCoroutine(StartGameAfter2Seconds());
     }
 

@@ -2,12 +2,10 @@ using Assets.Scripts;
 using Assets.Scripts.DataStructures;
 using Assets.Scripts.UI;
 using Newtonsoft.Json;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -19,9 +17,13 @@ public class GameManager : NetworkBehaviour
     public GameObject TokenPrefab;
     public GameObject PlayerPrefab;
     public Dice Dice;
+    public ParticleSystem ConfettisParticleSystem;
     private List<Token> tokens = new();
 
     private GameParameters gameParameters;
+    public bool AnimateDice => gameParameters != null && gameParameters.animaterDice;
+    public bool AnimateTokenMovement => gameParameters != null && gameParameters.animateTokenMovement;
+
     private int playerCount = 0;
     private int currentPlayerIndex = 0;
     private int winningPlayerIndex = 1;
@@ -106,7 +108,7 @@ public class GameManager : NetworkBehaviour
         }
         else
         {
-            SetupLists();
+            SetupLists(playerCount);
         }
 
         playerUIs.ForEach(p => p.OnPlayerTimeToPlayEnd += EndTimer);
@@ -201,6 +203,7 @@ public class GameManager : NetworkBehaviour
         tokens.ForEach(t => Destroy(t.gameObject));
         tokens.Clear();
         Players.Clear();
+        playerUIs.ForEach(p => p.Clear());
         Player1UI.gameObject.SetActive(false);
         Player2UI.gameObject.SetActive(false);
         Player3UI.gameObject.SetActive(false);
@@ -271,7 +274,6 @@ public class GameManager : NetworkBehaviour
     private void SwitchToStateWaitingForDice()
     {
         //Debug.Log("Switch to state WAITING_FOR_DICE : " + OnlinePlayerIdentity.ID);
-        Debug.Log("Starting ROLL DICE timer");
         CurrentPlayer.StartTimer();
         gameState = GameState.WaitingForDice;
         if (IsMyTurn)
@@ -327,13 +329,11 @@ public class GameManager : NetworkBehaviour
 
     private void AutoPlay()
     {
-        Debug.Log("Starting PICK TOKEN timer");
         CurrentPlayer.StartTimer();
 
         roundInfo.TokensWithNewPosition.AddRange(CurrentPlayer.GetTokensNewPositions(Dice.Value));
         if (roundInfo.TokensWithNewPosition.Count == 0)
         {
-            Debug.Log("Reset timer next round in autoplay");
             CurrentPlayer.ResetTimer();
             SwitchToStateNextRound();
             return;
@@ -378,7 +378,6 @@ public class GameManager : NetworkBehaviour
         {
             return;
         }
-        Debug.Log("Reset timer played token");
         CurrentPlayer.ResetTimer();
 
         UpdateIdlingTokens(false);
@@ -405,6 +404,7 @@ public class GameManager : NetworkBehaviour
         {
             roundInfo.EnterAToken();
             CurrentPlayer.Score();
+            ConfettisParticleSystem.Play();
         }
 
         if (CurrentPlayer.GetPlayableTokens().Count() == 0)
@@ -443,6 +443,10 @@ public class GameManager : NetworkBehaviour
             return;
         }
         roundInfo.Eat();
+
+        CurrentPlayer.PlayerInfo.KilledTokens++;
+        tokenToEat.player.PlayerInfo.DeadTokens++; ;
+
         await tokenToEat.player.MoveTokenToHouse(tokenToEat);
     }
 
@@ -477,7 +481,6 @@ public class GameManager : NetworkBehaviour
 
     public void RollDice()
     {
-        Debug.Log("Reset timer rolled dice");
         CurrentPlayer.ResetTimer();
         if (gameState != GameState.WaitingForDice)
         {
@@ -532,27 +535,31 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private void SetupLists()
+    private void SetupLists(int playerCount)
     {
         spawnSpaces.Add(HomeSpacesPlayer1);
         spawnSpaces.Add(HomeSpacesPlayer2);
         spawnSpaces.Add(HomeSpacesPlayer3);
-        spawnSpaces.Add(HomeSpacesPlayer4);
-
+        
         playerParameters.Add(Player1Parameters);
         playerParameters.Add(Player2Parameters);
         playerParameters.Add(Player3Parameters);
-        playerParameters.Add(Player4Parameters);
 
         Player1UI.gameObject.SetActive(true);
         Player2UI.gameObject.SetActive(true);
         Player3UI.gameObject.SetActive(true);
-        Player4UI.gameObject.SetActive(true);
 
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player2UI);
         playerUIs.Add(Player3UI);
-        playerUIs.Add(Player4UI);
+        
+        if (playerCount == 4)
+        {
+            spawnSpaces.Add(HomeSpacesPlayer4);
+            playerParameters.Add(Player4Parameters);
+            Player4UI.gameObject.SetActive(true);
+            playerUIs.Add(Player4UI);
+        }
     }
 
     private void SetupListsFor2Players()
@@ -563,8 +570,8 @@ public class GameManager : NetworkBehaviour
         playerParameters.Add(Player1Parameters);
         playerParameters.Add(Player3Parameters);
  
-        Player2UI.gameObject.SetActive(true);
-        Player4UI.gameObject.SetActive(true);
+        Player1UI.gameObject.SetActive(true);
+        Player3UI.gameObject.SetActive(true);
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player3UI);
     }
@@ -572,6 +579,7 @@ public class GameManager : NetworkBehaviour
     private void EndGame()
     {
         Players.Find(t => t.CanPlay).Win(winningPlayerIndex);
+        InGameUIManager.Instance.ResetCurrentPlayer();
         EndGameUIManager.Instance.UpdateUI(Players);
         GameMenuNavigator.Instance.DisplayEndGamePannel();
         ResetGame();

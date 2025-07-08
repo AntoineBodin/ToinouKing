@@ -13,6 +13,7 @@ namespace Assets.Scripts
         public int AvatarID;
         public int Score;
         public int Rank;
+        public int DeadTokens, KilledTokens;
 
         private const string k_playerID = "PlayerID";
         private const string k_playerName = "PlayerName";
@@ -25,6 +26,8 @@ namespace Assets.Scripts
             AvatarID = int.Parse(player.Data[k_playerAvatarID].Value);
             Score = 0;
             Rank = 0;
+            DeadTokens = 0;
+            KilledTokens = 0;
         }
 
         public static LudoPlayerInfo nullInstance = new()

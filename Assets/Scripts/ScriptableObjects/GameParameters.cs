@@ -10,4 +10,6 @@ public class GameParameters : ScriptableObject
     public int DefaultAvatarID = 0;
     public bool IsOnline = false;
     public int tokenCount = 2;
+    public bool animaterDice = true;
+    public bool animateTokenMovement = true;
 }

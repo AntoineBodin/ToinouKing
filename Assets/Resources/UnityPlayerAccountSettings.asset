@@ -9,13 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15031c54c6b722d47a109917ddbee97c, type: 3}
-  m_Name: OnlinePrototype
+  m_Script: {fileID: 11500000, guid: b58a3bc647e70774b8c7225eb3b51e7e, type: 3}
+  m_Name: UnityPlayerAccountSettings
   m_EditorClassIdentifier: 
-  Players: []
-  FirstPlayerIndex: 0
-  DefaultAvatarID: 0
-  IsOnline: 1
-  tokenCount: 4
-  animaterDice: 1
-  animateTokenMovement: 1
+  clientId: 
+  scopeMask: 7
+  useCustomDeepLinkUri: 0
+  customScheme: 
+  customHost: 
