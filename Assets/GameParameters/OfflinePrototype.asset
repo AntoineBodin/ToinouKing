@@ -19,3 +19,8 @@ MonoBehaviour:
   tokenCount: 4
   animaterDice: 1
   animateTokenMovement: 1
+  gameMode: 0
+  pointsForEnteredToken: 3
+  pointsForSafeToken: 1
+  pointsForKilledToken: 1
+  timeLimitInSeconds: 30

@@ -12,4 +12,17 @@ public class GameParameters : ScriptableObject
     public int tokenCount = 2;
     public bool animaterDice = true;
     public bool animateTokenMovement = true;
+    public GameMode gameMode = GameMode.Classic;
+    public int pointsForEnteredToken = 3;
+    public int pointsForSafeToken = 1;
+    public int pointsForKilledToken = 1;
+    public int timeLimitInSeconds = 60 * 10;
+    public bool spawnWithToken = false;
+}
+
+
+public enum GameMode
+{
+    TimeAttack,
+    Classic
 }

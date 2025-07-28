@@ -8,8 +8,8 @@ using Assets.Scripts.UI;
 
 public class EndGameUIManager : MonoBehaviour
 {
-    [SerializeField] private List<PlayerUIWithRank> playersUI;
     [SerializeField] private List<PlayerResultsLine> resultLines;
+    [SerializeField] private PlayerResultsLine header;
 
     [SerializeField] private Button backButton;
     [SerializeField] private TMP_Text backButtonText;
@@ -26,36 +26,26 @@ public class EndGameUIManager : MonoBehaviour
         backButton.onClick.AddListener(PlayAgainAction);
     }
 
-    public void UpdateUI(List<LudoPlayer> players)
+    public void UpdateUI(List<LudoPlayer> players, bool isTimeAttack)
     {
-        SetPlayersLines(players);
+        SetPlayersLines(players, isTimeAttack);
         backButtonText.text = GameManager.Instance.IsOnline ? "Back to Lobby" : "Play Again";
     }
 
-    private void SetPlayers(List<LudoPlayer> players)
+    private void SetPlayersLines(List<LudoPlayer> players, bool isTimeAttack)
     {
         int playerUIIndex = 0;
-        players.OrderBy(p => p.Rank).ToList().ForEach(p =>
-            {
-                playersUI[playerUIIndex].SetPlayerInfo(p.PlayerInfo);
-                playersUI[playerUIIndex].UpdateUI();
-                playersUI[playerUIIndex].UpdateColor(p.PlayerParameter.TokenColor);
-                playerUIIndex++;
-            });
-        for (int i = playerUIIndex; i < 4; i++)
-        {
-            playersUI[i].Clear();
-        }
-    }
 
-    private void SetPlayersLines(List<LudoPlayer> players)
-    {
-        int playerUIIndex = 0;
-        players.OrderBy(p => p.Rank).ToList().ForEach(p =>
+        header.SetColumns(isTimeAttack);
+
+        var orderedList = isTimeAttack ? players.OrderByDescending(p => p.PlayerInfo.Score).ToList() : players.OrderBy(p => p.Rank).ToList();
+
+        orderedList.ForEach(p =>
         {
-            resultLines[playerUIIndex].UpdateUI(p.PlayerInfo.Name.ToString(), p.PlayerInfo.DeadTokens, p.PlayerInfo.KilledTokens, p.PlayerParameter.TokenColor);
+            resultLines[playerUIIndex].UpdateUI(p.PlayerInfo.Name.ToString(), p.PlayerInfo.Score, p.PlayerInfo.DeadTokens, p.PlayerInfo.KilledTokens, p.PlayerInfo.EnteredTokens, p.PlayerInfo.SpawnTokens, p.PlayerInfo.HouseTokens, p.PlayerParameter.TokenColor, isTimeAttack);
             playerUIIndex++;
         });
+
         for (int i = playerUIIndex; i < 4; i++)
         {
             resultLines[i].gameObject.SetActive(false);

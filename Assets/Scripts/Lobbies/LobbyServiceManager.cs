@@ -86,17 +86,15 @@ public class LobbyServiceManager : NetworkBehaviour
         {
             await Authenticate();
             
-            JoinLobbyByCodeOptions options = new JoinLobbyByCodeOptions()
+            JoinLobbyByCodeOptions options = new()
             {
                 Player = playerInfo.GetPlayerData()
             };
 
-            // Rejoindre le lobby
             CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(joinCode, options);
             
             HeartBeatPingManager.Instance.Setup();
 
-            // Récupérer le code Relay du lobby
             if (CurrentLobby.Data.ContainsKey("RelayCode"))
             {
                 var relayCode = CurrentLobby.Data["RelayCode"].Value;
@@ -144,7 +142,7 @@ public class LobbyServiceManager : NetworkBehaviour
     {
         if (UnityServices.State == ServicesInitializationState.Uninitialized)
         {
-            InitializationOptions options = new InitializationOptions();
+            InitializationOptions options = new();
             options.SetProfile(playerName);
             await UnityServices.InitializeAsync(options);
         }
@@ -160,16 +158,16 @@ public class LobbyServiceManager : NetworkBehaviour
         }
     }
 
-    public void StartGame()
+    public void StartGame(GameMode gameMode, int timerValue, bool spawnWithToken)
     {
         if (NetworkManager.Singleton.IsHost)
         {
             List<LudoPlayerInfo> players = CurrentLobby.Players.Select(p => new LudoPlayerInfo(p)).ToList();
             int firstPlayerIndex = UnityEngine.Random.Range(0, players.Count);
 
-            Debug.Log("Starting game with firt player index: " + firstPlayerIndex);
+            Debug.Log("Starting game with first player index: " + firstPlayerIndex);
 
-            StartGame_ClientRpc(firstPlayerIndex);
+            StartGame_ClientRpc(firstPlayerIndex, gameMode, timerValue, spawnWithToken);
         }
         else
         {
@@ -181,7 +179,7 @@ public class LobbyServiceManager : NetworkBehaviour
     /// Start the game on every client
     /// </summary>
     [ClientRpc]
-    private void StartGame_ClientRpc(int firstPlayerIndex)
+    private void StartGame_ClientRpc(int firstPlayerIndex, GameMode gameMode, int timeLimitInSeconds, bool spawnWithToken)
     {
         Debug.Log("Start Game Client RPC called");
         List<LudoPlayerInfo> players = CurrentLobby.Players.Select(p => new LudoPlayerInfo(p)).ToList();
@@ -191,12 +189,15 @@ public class LobbyServiceManager : NetworkBehaviour
             Players = players,
             IsOnline = true,
             FirstPlayerIndex = firstPlayerIndex,
-            tokenCount = 4
+            tokenCount = 4,
+            gameMode = gameMode,
+            timeLimitInSeconds = timeLimitInSeconds,
+            spawnWithToken = spawnWithToken
         };
 
         GameMenuNavigator.Instance.DisplayBoardPanel();
 
-        GameManager.Instance.StartGame(gameParameters);
+        GameManager.Instance.SetupGame(gameParameters);
     }
 
     internal async Task DisconnectFromLobby()
@@ -254,11 +255,39 @@ public class LobbyServiceManager : NetworkBehaviour
             }
             };
 
+            LobbyUIManager.Instance.SetupTimeAttackParameters();
+
             await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, lobbyUpdate);
         }
         catch (Exception e)
         {
             Debug.LogError("Failed to change host: " + e.Message);
         }
+    }
+
+    internal async Task UpdateLobbyDataIsTimeAttackToggled(bool isTimeAttackToggled)
+    {
+        var lobbyUpdate = new UpdateLobbyOptions()
+        {
+            Data = new Dictionary<string, DataObject>()
+            {
+                { "isTimeAttackToggled", new DataObject(DataObject.VisibilityOptions.Member, isTimeAttackToggled.ToString()) }
+            }
+        };
+
+        await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, lobbyUpdate);
+    }
+
+    internal async Task UpdateLobbyDataTimeLimitInSeconds(int timerValue)
+    {
+        var lobbyUpdate = new UpdateLobbyOptions()
+        {
+            Data = new Dictionary<string, DataObject>()
+            {
+                { "timeLimitInSeconds", new DataObject(DataObject.VisibilityOptions.Member, timerValue.ToString()) }
+            }
+        };
+
+        await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, lobbyUpdate);
     }
 }

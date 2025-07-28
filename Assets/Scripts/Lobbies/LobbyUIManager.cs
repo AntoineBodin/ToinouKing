@@ -10,13 +10,14 @@ using Assets.Scripts;
 using TMPro;
 using Unity.Netcode;
 
-public class LobbyUIManager : MonoBehaviour
+public class LobbyUIManager : NetworkBehaviour
 {
     [SerializeField] private Button hostJoinButton;
     [SerializeField] private Button startGameButton;
     public TMP_InputField joinCodeInputField;
     public TMP_InputField playerNameInput;
     public TMP_Text LobbyCode;
+    [SerializeField] private GameParametersSettings gameParametersSettings;
 
     private Lobby currentLobby;
     public List<SimplePlayerUI> PlayerLobbyUIs;
@@ -70,6 +71,57 @@ public class LobbyUIManager : MonoBehaviour
                 Debug.Log("Only host can start the game.");
             }
         });
+
+        NetworkManager.Singleton.OnClientConnectedCallback += (id) => UpdateGameParameters_ServerRpc();
+    }
+
+    public void SetupTimeAttackParameters()
+    {
+        gameParametersSettings.SetIsHost(NetworkManager.Singleton.IsHost);
+
+        if (NetworkManager.Singleton.IsHost)
+        {
+            gameParametersSettings.OnSliderValueChanged += (value) =>
+            {
+                UpdateTimerSlider_ClientRpc(value);
+                //await LobbyServiceManager.Instance.UpdateLobbyDataTimeLimitInSeconds(value);
+            };
+            gameParametersSettings.OnGameModeBoxChecked += (isChecked) =>
+            {
+                CheckTimeAttackMode_ClientRpc(isChecked);
+                //await LobbyServiceManager.Instance.UpdateLobbyDataIsTimeAttackToggled(isChecked);
+            };
+            gameParametersSettings.OnSpawnWithTokenBoxChecked += (isChecked) =>
+            {
+                CheckSpawnWithToken_ClientRpc(isChecked);
+                // This is not used in the lobby, but could be used to update the game settings
+                // await LobbyServiceManager.Instance.UpdateLobbyDataSpawnWithTokensToggled(isChecked);
+            };
+        }
+    }
+
+    [ClientRpc]
+    private void CheckTimeAttackMode_ClientRpc(bool isChecked)
+    {
+        if (IsHost) return;
+        Debug.Log("CheckTimeAttackMode_ClientRpc called");
+        gameParametersSettings.SetIsTimeAttackChecked(isChecked);
+    }
+
+    [ClientRpc]
+    private void CheckSpawnWithToken_ClientRpc(bool isChecked)
+    {
+        if (IsHost) return;
+        Debug.Log("CheckSpawnWithToken_ClientRpc called");
+        gameParametersSettings.SetSpawnWithTokensChecked(isChecked);
+    }
+
+    [ClientRpc]
+    private void UpdateTimerSlider_ClientRpc(int value)
+    {
+        if (IsHost) return;
+        Debug.Log("UpdateTimerSlider_ClientRpc called");
+        gameParametersSettings.SetTimerValue(value);
     }
 
     private void UpdateJoinStartButton()
@@ -128,7 +180,7 @@ public class LobbyUIManager : MonoBehaviour
             GameMenuNavigator.Instance.EnableSpinner();
 
             var lobby = await LobbyServiceManager.Instance.JoinLobbyAsync(joinCode, playerInfo);
-            
+
             if (lobby != null)
             {
                 currentLobby = lobby;
@@ -150,6 +202,8 @@ public class LobbyUIManager : MonoBehaviour
     private void SwitchToLobbyScreen()
     {
         GameMenuNavigator.Instance.DisplayLobbyPanel();
+        SetupTimeAttackParameters();
+
         UpdateUI();
     }
 
@@ -169,8 +223,20 @@ public class LobbyUIManager : MonoBehaviour
         {
             PlayerLobbyUIs[i].Clear();
         }
-    }
 
+        if (!IsHost)
+        {
+            startGameButton.interactable = false;
+        }
+
+    }
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdateGameParameters_ServerRpc()
+    {
+        CheckTimeAttackMode_ClientRpc(gameParametersSettings.GetGameMode() == GameMode.TimeAttack);
+        UpdateTimerSlider_ClientRpc(gameParametersSettings.GetTimerValue());
+        CheckSpawnWithToken_ClientRpc(gameParametersSettings.IsSpawnWithTokensChecked());
+    }
     private LudoPlayerInfo GetPlayerInfo()
     {
         return new LudoPlayerInfo
@@ -183,7 +249,7 @@ public class LobbyUIManager : MonoBehaviour
 
     private void StartGame()
     {
-        LobbyServiceManager.Instance.StartGame();
+        LobbyServiceManager.Instance.StartGame(gameParametersSettings.GetGameMode(), gameParametersSettings.GetTimerValue(), gameParametersSettings.IsSpawnWithTokensChecked());
     }
 
 }

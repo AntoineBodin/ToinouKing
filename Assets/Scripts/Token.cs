@@ -1,3 +1,5 @@
+using Assets.Scripts;
+using Assets.Scripts.Helpers;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
@@ -33,8 +35,8 @@ public class Token : MonoBehaviour
 
     public void Enter()
     {
-        this.sprite.sprite = null;
-        this.HasWon = true;
-        this.currentPosition = null;
+        currentPosition.TokensByPlayer.RemoveToken(this);
+        TokenSpawner.Instance.TokensByPlayer.RemoveToken(this);
+        Destroy(this.gameObject);
     }
 }

@@ -9,12 +9,13 @@ namespace Assets.Scripts
         internal bool HasEaten { get; private set; } = false;
         public bool HasEnteredAToken { get; private set; } = false;
         public Dictionary<int, TokenSpace> TokensWithNewPosition = new();
-
+        public bool IsLastTurn = false;
         public void Reset()
         {
             PlayerHasWon = false;
             HasEaten = false;
             HasEnteredAToken = false;
+            IsLastTurn = false;
             TokensWithNewPosition.Clear();
         }
 
