@@ -23,7 +23,7 @@ public class LobbyCallBackManager : MonoBehaviour
 
     public LobbyEventCallbacks GetLobbyEventCallbacks()
     {
-        LobbyEventCallbacks callbacks = new LobbyEventCallbacks();
+        LobbyEventCallbacks callbacks = new();
         callbacks.LobbyChanged += OnLobbyChanged;
         callbacks.PlayerJoined += OnPlayerJoined;
         callbacks.PlayerLeft += OnPlayerLeft;

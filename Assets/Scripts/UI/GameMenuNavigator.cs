@@ -7,33 +7,35 @@ using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameMenuNavigator : MonoBehaviour
 {
     [Header("Offline Elements")]
-    public Transform PlayersRow1;
-    public Transform PlayersRow2;
-    public GameObject Player1;
-    public GameObject Player2;
-    public GameObject Player3;
-    public GameObject Player4;
-    public GameObject AddPlayerPlaceHolder;
-    public Button PlayOfflineButton;
+    [SerializeField] private Transform PlayersRow1;
+    [SerializeField] private Transform PlayersRow2;
+    [SerializeField] private GameObject Player1;
+    [SerializeField] private GameObject Player2;
+    [SerializeField] private GameObject Player3;
+    [SerializeField] private GameObject Player4;
+    [SerializeField] private GameObject AddPlayerPlaceHolder;
+    [SerializeField] private Button PlayOfflineButton;
     private Button AddPlayerButton, RemovePlayer3Button, RemovePlayer4Button;
     private TMP_InputField Player1NameInputField, Player2NameInputField, Player3NameInputField, Player4NameInputField;
+    [SerializeField] private GameParametersSettings gameParametersSettings;
 
     [Header("Buttons")]
-    public Button PlayButton;
-    public Button BackButton;
+    [SerializeField] private Button PlayButton;
+    [SerializeField] private Button BackButton;
 
     [Header("Elements")]
-    public GameObject Spinner;
+    [SerializeField] private GameObject Spinner;
 
     [Header("Switches")]
-    public Slider OnlineLocalSwitch;
-    public Animator PlayPanelAnimator;
+    [SerializeField] private Slider OnlineLocalSwitch;
+    [SerializeField] private Animator PlayPanelAnimator;
 
     public static event Action<bool> OnOnlineLocalSwitched;
     public static GameMenuNavigator Instance;
@@ -181,7 +183,7 @@ public class GameMenuNavigator : MonoBehaviour
     private IEnumerator StartGameAfter2Seconds()
     {
         yield return new WaitForSeconds(1f);
-        GameManager.Instance.StartGame(GetOfflineGameParameters());
+        GameManager.Instance.SetupGame(GetOfflineGameParameters());
     }
 
     #endregion
@@ -218,7 +220,11 @@ public class GameMenuNavigator : MonoBehaviour
 
     private GameParameters GetOfflineGameParameters()
     {
-        return GameParametersManager.Instance.GetOfflineParameters(GetOfflinePlayerList());
+        List<LudoPlayerInfo> offlinePlayerList = GetOfflinePlayerList();
+        bool isTimeAttackMode = gameParametersSettings.GetGameMode() == GameMode.TimeAttack;
+        int timeInSeconds = Mathf.CeilToInt(gameParametersSettings.GetTimerValue());
+        bool spawnWithToken = gameParametersSettings.IsSpawnWithTokensChecked();
+        return GameParametersManager.Instance.GetOfflineParameters(offlinePlayerList, isTimeAttackMode, timeInSeconds, spawnWithToken);
     }
 
     private List<LudoPlayerInfo> GetOfflinePlayerList()
