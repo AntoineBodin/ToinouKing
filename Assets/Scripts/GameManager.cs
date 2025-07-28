@@ -1,27 +1,29 @@
 using Assets.Scripts;
 using Assets.Scripts.DataStructures;
+using Assets.Scripts.Helpers;
 using Assets.Scripts.UI;
 using Newtonsoft.Json;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : NetworkBehaviour
 {
-    public GameObject TokenPrefab;
     public GameObject PlayerPrefab;
     public Dice Dice;
-    private List<Token> tokens = new();
+    public ParticleSystem ConfettisParticleSystem;
 
     private GameParameters gameParameters;
+    public bool AnimateDice => gameParameters != null && gameParameters.animaterDice;
+    public bool AnimateTokenMovement => gameParameters != null && gameParameters.animateTokenMovement;
+
     private int playerCount = 0;
     private int currentPlayerIndex = 0;
     private int winningPlayerIndex = 1;
@@ -30,34 +32,43 @@ public class GameManager : NetworkBehaviour
 
     private GameState gameState;
 
+    [Header("Board")]
+    [SerializeField] private Image boardImage;
+    [SerializeField] private Sprite BoardImageClassic;
+    [SerializeField] private Sprite boardImageTA;
+
     [Header("Spaces")]
     public List<TokenSpace> TokenSpaces;
 
     [Header("Player 1")]
     public PlayerUIWithScore Player1UI;
-    public List<TokenSpace> HomeSpacesPlayer1;
+    public List<TokenSpace> HomeSpacesPlayer1Classic;
+    public TokenSpace HomeSpacePlayer1TA;
     public PlayerParameter Player1Parameters;
 
     [Header("Player 2")]
     public PlayerUIWithScore Player2UI;
-    public List<TokenSpace> HomeSpacesPlayer2;
+    public List<TokenSpace> HomeSpacesPlayer2Classic;
+    public TokenSpace HomeSpacePlayer2TA;
     public PlayerParameter Player2Parameters;
 
     [Header("Player 3")]
     public PlayerUIWithScore Player3UI;
-    public List<TokenSpace> HomeSpacesPlayer3;
+    public List<TokenSpace> HomeSpacesPlayer3Classic;
+    public TokenSpace HomeSpacePlayer3TA;
     public PlayerParameter Player3Parameters;
 
     [Header("Player 4")]
     public PlayerUIWithScore Player4UI;
-    public List<TokenSpace> HomeSpacesPlayer4;
+    public List<TokenSpace> HomeSpacesPlayer4Classic;
+    public TokenSpace HomeSpacePlayer4TA;
     public PlayerParameter Player4Parameters;
 
-    private List<List<TokenSpace>> spawnSpaces = new();
-    private List<PlayerParameter> playerParameters = new();
-    private List<PlayerUIWithScore> playerUIs = new();
+    private readonly List<List<TokenSpace>> spawnSpaces = new();
+    private readonly List<PlayerParameter> playerParameters = new();
+    private readonly List<PlayerUIWithScore> playerUIs = new();
 
-    private RoundInfo roundInfo = new();
+    private readonly RoundInfo roundInfo = new();
 
     public List<LudoPlayer> PlayingPlayers => Players.Where(p => p.CanPlay).ToList();
     public List<LudoPlayer> Players = new();
@@ -67,6 +78,7 @@ public class GameManager : NetworkBehaviour
     public bool CanPlayIfOnline => !IsOnline || IsMyTurn;
 
     public LudoPlayerInfo OnlinePlayerIdentity { get; internal set; }
+    public GameMode GameMode => gameParameters.gameMode;
 
     public static GameManager Instance;
 
@@ -94,19 +106,20 @@ public class GameManager : NetworkBehaviour
         };
     }
 
-    internal void StartGame(GameParameters gameParameters)
+    internal void SetupGame(GameParameters gameParameters)
     {
         this.gameParameters = gameParameters;
         playerCount = this.gameParameters.Players.Count;
 
-        //Debug.Log("Start game with " + playerCount + " players");
+        SetupBoardForGameMode();
+
         if (playerCount == 2)
         {
             SetupListsFor2Players();
         }
         else
         {
-            SetupLists();
+            SetupLists(playerCount);
         }
 
         playerUIs.ForEach(p => p.OnPlayerTimeToPlayEnd += EndTimer);
@@ -117,14 +130,40 @@ public class GameManager : NetworkBehaviour
         }
 
         CreatePlayers();
-        StartCoroutine(SpawnTokensCoroutine());
+        StartCoroutine(StartGameAnimationCoroutine(gameParameters.spawnWithToken));
+    }
 
+    private void StartGame()
+    {
         currentPlayerIndex = this.gameParameters.FirstPlayerIndex;
 
         UpdateCurrentPlayerWithIndex();
         UpdateCurrentPlayerDisplay(false);
-
         SwitchToStateStartRound();
+    }
+
+    private void SetupBoardForGameMode()
+    {
+        switch (gameParameters.gameMode)
+        {
+            case GameMode.Classic:
+                boardImage.sprite = BoardImageClassic;
+                break;
+            case GameMode.TimeAttack:
+                boardImage.sprite = boardImageTA;
+                break;
+        }
+
+        if (gameParameters.gameMode == GameMode.TimeAttack)
+        {
+            InGameUIManager.Instance.DisplayTimer();
+            InGameUIManager.Instance.StartTimer(gameParameters.timeLimitInSeconds);
+            InGameUIManager.Instance.OnTimerEnd += () => roundInfo.IsLastTurn = true;
+        }
+        else
+        {
+            InGameUIManager.Instance.HideTimer();
+        }
     }
 
     private void EndTimer()
@@ -133,12 +172,10 @@ public class GameManager : NetworkBehaviour
         { 
             if (gameState == GameState.WaitingForDice)
             {
-                Debug.Log("End Timer Rolling Dice");
                 Dice.OnMouseDown();
             }
             else if (gameState == GameState.ChoosingToken)
             {
-                Debug.Log("End Timer Choosing Token");
                 PlayRandomToken();
             }
             else
@@ -175,32 +212,28 @@ public class GameManager : NetworkBehaviour
         return player;
     }
 
-    private IEnumerator SpawnTokensCoroutine()
+    private IEnumerator StartGameAnimationCoroutine(bool spawnWithToken)
     {
-        int playerIndex = 0;
+        TokenSpawner.Instance.Setup(Players);
         foreach (var player in Players)
         {
             if (!player.IsBlank)
             {
-                StartCoroutine(player.SpawnTokensCoroutine(TokenPrefab, playerIndex, gameParameters.tokenCount));
+                StartCoroutine(player.SpawnTokensCoroutine(gameParameters.gameMode == GameMode.Classic? gameParameters.tokenCount : 1, spawnWithToken));
                 yield return new WaitForSeconds(1f);
             }
-            playerIndex++;
         }
-    }
 
-    public void AddTokens(List<Token> newTokens)
-    {
-        tokens.AddRange(newTokens);
+        StartGame();
     }
 
     #endregion
 
     private void ResetGame()
     {
-        tokens.ForEach(t => Destroy(t.gameObject));
-        tokens.Clear();
+        TokenSpawner.Instance.DestroyAndClear();
         Players.Clear();
+        playerUIs.ForEach(p => p.Clear());
         Player1UI.gameObject.SetActive(false);
         Player2UI.gameObject.SetActive(false);
         Player3UI.gameObject.SetActive(false);
@@ -237,10 +270,8 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateStartRound()
     {
-        //Debug.Log("Switch to state START_ROUND");
         gameState = GameState.StartRound;
         roundInfo.Reset();
-        //SaveGameToLobby();
         SwitchToStateWaitingForDice();
     }
 
@@ -248,7 +279,7 @@ public class GameManager : NetworkBehaviour
     {
         Snapshot snapshot = new()
         {
-            Tokens = tokens,
+            //Tokens = tokens,
             Players = Players,
             CurrentPlayer = CurrentPlayer
         };
@@ -270,8 +301,6 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateWaitingForDice()
     {
-        //Debug.Log("Switch to state WAITING_FOR_DICE : " + OnlinePlayerIdentity.ID);
-        Debug.Log("Starting ROLL DICE timer");
         CurrentPlayer.StartTimer();
         gameState = GameState.WaitingForDice;
         if (IsMyTurn)
@@ -282,16 +311,12 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateAutoPlay()
     {
-        //Debug.Log("Switch to state AUTO_PLAY");
-
         gameState = GameState.AutoPlay;
         AutoPlay();
     }
 
     private void SwitchToStateChoosingToken() 
     {
-        //Debug.Log("Switch to state CHOOSING_TOKEN");
-
         gameState = GameState.ChoosingToken;
         if (CanPlayIfOnline)
         {
@@ -301,15 +326,12 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToStateEndRound()
     {
-        //Debug.Log("Switch to state END_ROUND");
-
         gameState = GameState.EndRound;
         EndRound();
     }
 
     private void SwitchToStateNextRound()
     {
-        //Debug.Log("Switch to state NEXT_ROUND");
         gameState = GameState.NextRound;
         NextRound();
     }
@@ -319,7 +341,7 @@ public class GameManager : NetworkBehaviour
         //Debug.Log("Switch to state END_GAME");
         gameState = GameState.EndGame;
 
-        EndGame();
+        StartCoroutine(EndGameCoroutine());
     }
 
 
@@ -327,13 +349,11 @@ public class GameManager : NetworkBehaviour
 
     private void AutoPlay()
     {
-        Debug.Log("Starting PICK TOKEN timer");
         CurrentPlayer.StartTimer();
 
         roundInfo.TokensWithNewPosition.AddRange(CurrentPlayer.GetTokensNewPositions(Dice.Value));
         if (roundInfo.TokensWithNewPosition.Count == 0)
         {
-            Debug.Log("Reset timer next round in autoplay");
             CurrentPlayer.ResetTimer();
             SwitchToStateNextRound();
             return;
@@ -349,7 +369,6 @@ public class GameManager : NetworkBehaviour
 
     public void PickToken(int tokenID)
     {
-        //Debug.Log("Token chosen: " + tokenID);
         if (gameParameters.IsOnline)
         {
             PickToken_ServerRPC(tokenID);
@@ -378,7 +397,6 @@ public class GameManager : NetworkBehaviour
         {
             return;
         }
-        Debug.Log("Reset timer played token");
         CurrentPlayer.ResetTimer();
 
         UpdateIdlingTokens(false);
@@ -394,17 +412,40 @@ public class GameManager : NetworkBehaviour
                 tokenToEat = newPosition.TokensByPlayer[foundPlayer].FirstOrDefault();
             }
         }
-        await CurrentPlayer.MoveToken(tokens.Find(t => t.ID == tokenID), newPosition);
+
+        var tokenToPlay = TokenSpawner.Instance.TokensByPlayer.FindById(tokenID);
+
+        if (tokenToPlay.IsInHouse && gameParameters.gameMode == GameMode.TimeAttack)
+        {
+            TokenSpawner.Instance.SpawnTokenForPlayer(CurrentPlayer, false);
+        }
+
+        await CurrentPlayer.MoveToken(tokenToPlay, newPosition);
 
         if (tokenToEat != null)
         {
             await EatToken(tokenToEat);
+            if (GameMode == GameMode.TimeAttack)
+                CurrentPlayer.Score(1);
         }
 
         if (CurrentPlayer.IsWinningIndex(newPosition.Index))
         {
+            int winningTokenPoints = 1;
+            if (gameParameters.gameMode == GameMode.TimeAttack)
+            {
+                winningTokenPoints = gameParameters.pointsForEnteredToken;
+            }
+
             roundInfo.EnterAToken();
-            CurrentPlayer.Score();
+            CurrentPlayer.Score(winningTokenPoints);
+            CurrentPlayer.EnterAToken();
+            ConfettisParticleSystem.Play();
+        }
+
+        if (roundInfo.IsLastTurn)
+        {
+            SwitchToEndGame();
         }
 
         if (CurrentPlayer.GetPlayableTokens().Count() == 0)
@@ -420,7 +461,7 @@ public class GameManager : NetworkBehaviour
 
     private void PlayRandomToken()
     {
-        int keyIndex = UnityEngine.Random.Range(0, roundInfo.TokensWithNewPosition.Keys.Count - 1);
+        int keyIndex = UnityEngine.Random.Range(0, roundInfo.TokensWithNewPosition.Keys.Count);
         int tokenId = roundInfo.TokensWithNewPosition.Keys.ElementAt(keyIndex);
         PickToken(tokenId);
     }
@@ -443,22 +484,21 @@ public class GameManager : NetworkBehaviour
             return;
         }
         roundInfo.Eat();
-        await tokenToEat.player.MoveTokenToHouse(tokenToEat);
+
+        CurrentPlayer.PlayerInfo.KilledTokens++;
+        tokenToEat.player.PlayerInfo.DeadTokens++; ;
+
+        await tokenToEat.player.MoveTokenToHouse(tokenToEat, gameParameters.gameMode);
     }
 
     public void EndRound()
     {
-        // Play again
         if (!roundInfo.PlayerHasWon && (Dice.Value == 6 || roundInfo.HasEaten || roundInfo.HasEnteredAToken))
         {
-            //Debug.Log("Playing Again");
             SwitchToStateStartRound();
         }
-
-        // Next Player
         else
         {
-            //Debug.Log("Next Turn");
             SwitchToStateNextRound();
         }
     }
@@ -477,7 +517,6 @@ public class GameManager : NetworkBehaviour
 
     public void RollDice()
     {
-        Debug.Log("Reset timer rolled dice");
         CurrentPlayer.ResetTimer();
         if (gameState != GameState.WaitingForDice)
         {
@@ -502,16 +541,14 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void Roll_ClientRpc(int value)
     {
-        //Dice.SetDiceSprite(value);
         Dice.AnimateRoll(value);
-        //RollDice();
     }
 
     private void UpdateIdlingTokens(bool isIdling)
     {
         foreach (var playableTokenID in roundInfo.TokensWithNewPosition.Keys)
         {
-            tokens.Find(t => t.ID == playableTokenID).UpdateIdling(isIdling);
+            TokenSpawner.Instance.TokensByPlayer.FindById(playableTokenID).UpdateIdling(isIdling);
         }
     }
 
@@ -532,47 +569,102 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private void SetupLists()
+    private void SetupLists(int playerCount)
     {
-        spawnSpaces.Add(HomeSpacesPlayer1);
-        spawnSpaces.Add(HomeSpacesPlayer2);
-        spawnSpaces.Add(HomeSpacesPlayer3);
-        spawnSpaces.Add(HomeSpacesPlayer4);
-
+        if (gameParameters.gameMode == GameMode.TimeAttack)
+        {
+            spawnSpaces.Add(new List<TokenSpace> { HomeSpacePlayer1TA });
+            spawnSpaces.Add(new List<TokenSpace> { HomeSpacePlayer2TA });
+            spawnSpaces.Add(new List<TokenSpace> { HomeSpacePlayer3TA });
+        }
+        else
+        {
+            spawnSpaces.Add(HomeSpacesPlayer1Classic);
+            spawnSpaces.Add(HomeSpacesPlayer2Classic);
+            spawnSpaces.Add(HomeSpacesPlayer3Classic);
+        }
+        
         playerParameters.Add(Player1Parameters);
         playerParameters.Add(Player2Parameters);
         playerParameters.Add(Player3Parameters);
-        playerParameters.Add(Player4Parameters);
 
         Player1UI.gameObject.SetActive(true);
         Player2UI.gameObject.SetActive(true);
         Player3UI.gameObject.SetActive(true);
-        Player4UI.gameObject.SetActive(true);
 
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player2UI);
         playerUIs.Add(Player3UI);
-        playerUIs.Add(Player4UI);
+        
+        if (playerCount == 4)
+        {
+            if (gameParameters.gameMode == GameMode.TimeAttack)
+            {
+                spawnSpaces.Add(new List<TokenSpace> { HomeSpacePlayer4TA });
+            }
+            else
+            {
+                spawnSpaces.Add(HomeSpacesPlayer4Classic);
+            }
+            playerParameters.Add(Player4Parameters);
+            Player4UI.gameObject.SetActive(true);
+            playerUIs.Add(Player4UI);
+        }
     }
 
     private void SetupListsFor2Players()
     {
-        spawnSpaces.Add(HomeSpacesPlayer1);
-        spawnSpaces.Add(HomeSpacesPlayer3);
+        if (gameParameters.gameMode == GameMode.TimeAttack)
+        {
+            spawnSpaces.Add(new List<TokenSpace> { HomeSpacePlayer1TA });
+            spawnSpaces.Add(new List<TokenSpace> { HomeSpacePlayer3TA });
+        }
+        else
+        {
+            spawnSpaces.Add(HomeSpacesPlayer1Classic);
+            spawnSpaces.Add(HomeSpacesPlayer3Classic);
+        }
 
         playerParameters.Add(Player1Parameters);
         playerParameters.Add(Player3Parameters);
  
-        Player2UI.gameObject.SetActive(true);
-        Player4UI.gameObject.SetActive(true);
+        Player1UI.gameObject.SetActive(true);
+        Player3UI.gameObject.SetActive(true);
         playerUIs.Add(Player1UI);
         playerUIs.Add(Player3UI);
     }
     
-    private void EndGame()
+    private IEnumerator EndGameCoroutine()
     {
         Players.Find(t => t.CanPlay).Win(winningPlayerIndex);
-        EndGameUIManager.Instance.UpdateUI(Players);
+
+        if (gameParameters.gameMode == GameMode.TimeAttack)
+        {
+            foreach (var kvp in TokenSpawner.Instance.TokensByPlayer.ToList())
+            {
+                var player = kvp.Key;
+                var tokens = kvp.Value;
+
+                foreach (var token in tokens.ToList())
+                {
+                    if (token.currentPosition == player.StartSpace)
+                    {
+                        player.DecreaseScore(1);
+                        player.AddSpawnToken();
+                    }
+                    if (token.currentPosition.IsFinishLine)
+                    {
+                        player.Score(1);
+                        player.AddHouseToken();
+                    }
+                    yield return new WaitForSeconds(0.25f);
+                    TokenSpawner.Instance.TokensByPlayer.RemoveToken(token);
+                    Destroy(token.gameObject);
+                }
+            }
+        }
+        InGameUIManager.Instance.ResetCurrentPlayer();
+        EndGameUIManager.Instance.UpdateUI(Players, gameParameters.gameMode == GameMode.TimeAttack);
         GameMenuNavigator.Instance.DisplayEndGamePannel();
         ResetGame();
     }

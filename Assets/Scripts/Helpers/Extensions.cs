@@ -4,15 +4,15 @@ namespace Assets.Scripts.Helpers
 {
     public static class Extensions
     {
-        public static void RemoveToken(this Dictionary<LudoPlayer, List<Token>> dic, Token token)
+        public static void RemoveToken(this Dictionary<LudoPlayer, List<Token>> dic, Token token, bool removePlayerIfEmpty = false)
         {
-            if (dic[token.player].Contains(token))
+            if (!dic.ContainsKey(token.player) || !dic[token.player].Contains(token))
+                return;
+
+            dic[token.player].Remove(token);
+            if (removePlayerIfEmpty && dic[token.player].Count == 0)
             {
-                dic[token.player].Remove(token);
-                if (dic[token.player].Count == 0)
-                {
-                    dic.Remove(token.player);
-                }
+                dic.Remove(token.player);
             }
         }
 
@@ -26,6 +26,19 @@ namespace Assets.Scripts.Helpers
             {
                 dic.Add(token.player, new List<Token>() { token });
             }
+        }
+
+        public static Token FindById(this Dictionary<LudoPlayer, List<Token>> dic, int id)
+        {
+            foreach (var playerTokens in dic.Values)
+            {
+                Token token = playerTokens.Find(t => t.ID == id);
+                if (token != null)
+                {
+                    return token;
+                }
+            }
+            return null;
         }
     }
 }

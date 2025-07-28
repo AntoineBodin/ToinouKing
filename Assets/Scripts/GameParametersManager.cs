@@ -26,7 +26,7 @@ namespace Assets.Scripts
             }
         }
 
-        public GameParameters GetOfflineParameters(List<LudoPlayerInfo> ludoPlayerInfos)
+        public GameParameters GetOfflineParameters(List<LudoPlayerInfo> ludoPlayerInfos, bool isTimeAttackMode, int timeInSeconds, bool spawnWithToken)
         {
             if (offlinePrototype != null)
             {
@@ -34,6 +34,9 @@ namespace Assets.Scripts
 
                 res.Players = ludoPlayerInfos;
                 res.FirstPlayerIndex = UnityEngine.Random.Range(0, ludoPlayerInfos.Count);
+                res.gameMode = isTimeAttackMode ? GameMode.TimeAttack : GameMode.Classic;
+                res.timeLimitInSeconds = timeInSeconds;
+                res.spawnWithToken = spawnWithToken;
 
                 return res;
             }

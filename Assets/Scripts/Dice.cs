@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
 using Random = UnityEngine.Random;
 
 public class Dice : MonoBehaviour
@@ -29,6 +28,7 @@ public class Dice : MonoBehaviour
     {
         if (hasPlayed)
             return;
+        hasPlayed = true;
 
         int diceValue = GetDiceRoll();
 
@@ -46,8 +46,6 @@ public class Dice : MonoBehaviour
         else
         {
             AnimateRoll(diceValue);
-            //SetDiceValueAndSprite(diceValue);
-            //GameManager.Instance.RollDice();
         }
     }
 
@@ -58,18 +56,19 @@ public class Dice : MonoBehaviour
 
     private IEnumerator DiceRollAnimationCoroutine(int diceValue)
     {
-        hasPlayed = true;
-        int nbOfFrames = 10;
+        int nbOfFrames = 5;
         float animationTime = 0.5f;
 
         OnDiceRollStarts?.Invoke();
-
-        for (int i = 0; i < nbOfFrames; i++)
+        if (GameManager.Instance.AnimateDice)
         {
-            int randomValue = Random.Range(1, 7);
-            SetDiceSprite(randomValue);
+            for (int i = 0; i < nbOfFrames; i++)
+            {
+                int randomValue = Random.Range(1, 7);
+                SetDiceSprite(randomValue);
 
-            yield return new WaitForSeconds(animationTime / nbOfFrames);
+                yield return new WaitForSeconds(animationTime / nbOfFrames);
+            }
         }
 
         SetDiceValueAndSprite(diceValue);

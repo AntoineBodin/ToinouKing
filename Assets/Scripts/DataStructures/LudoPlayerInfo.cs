@@ -13,6 +13,7 @@ namespace Assets.Scripts
         public int AvatarID;
         public int Score;
         public int Rank;
+        public int DeadTokens, KilledTokens, EnteredTokens, SpawnTokens, HouseTokens;
 
         private const string k_playerID = "PlayerID";
         private const string k_playerName = "PlayerName";
@@ -25,9 +26,14 @@ namespace Assets.Scripts
             AvatarID = int.Parse(player.Data[k_playerAvatarID].Value);
             Score = 0;
             Rank = 0;
+            DeadTokens = 0;
+            KilledTokens = 0;
+            EnteredTokens = 0;
+            SpawnTokens = 0;
+            HouseTokens = 0;
         }
 
-        public static LudoPlayerInfo nullInstance = new()
+        public static readonly LudoPlayerInfo nullInstance = new()
         {
             ID = "",
             Name = "",
@@ -36,10 +42,7 @@ namespace Assets.Scripts
         };
 
 
-        public bool Equals(LudoPlayerInfo other)
-        {
-            return ID == other.ID;
-        }
+        public bool Equals(LudoPlayerInfo other) => ID == other.ID;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {

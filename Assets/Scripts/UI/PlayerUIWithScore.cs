@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,7 @@ namespace Assets.Scripts.UI
 {
     public class PlayerUIWithScore : SimplePlayerUI
     {
-
-        private const float LONG_TIME_TO_PLAY = 5f;
+        private const float LONG_TIME_TO_PLAY = 20f;
         private const float SHORT_TIME_TO_PLAY = 5f;
         private bool isAFK = false;
 
@@ -38,7 +38,6 @@ namespace Assets.Scripts.UI
         {
             float timeToPlay = GetTimeToPlay();
 
-            Debug.Log("\tStart timer");
             if (currentCoroutine != null)
             {
                 StopCoroutine(currentCoroutine);
@@ -49,7 +48,6 @@ namespace Assets.Scripts.UI
 
         public void ResetTimer()
         {
-            Debug.Log("\tStop timer");
             if (currentCoroutine != null)
             {
                 StopCoroutine(currentCoroutine);
@@ -80,11 +78,43 @@ namespace Assets.Scripts.UI
 
         private float GetTimeToPlay() => isAFK ? SHORT_TIME_TO_PLAY : LONG_TIME_TO_PLAY;
 
+/*        private void UpdateScore()
+        {
+            if (PlayerScoreText != null)
+            {
+                // write an animation with dotween to scale up the text, change it and then scale down to normal size
+                
+
+
+                PlayerScoreText.text = this.PlayerInfo.Score.ToString();
+            }
+        }*/
+
         private void UpdateScore()
         {
             if (PlayerScoreText != null)
             {
-                PlayerScoreText.text = this.PlayerInfo.Score.ToString();
+                // Animate: scale up, change text, scale down
+                float scaleUp = 1.3f;
+                float duration = 0.15f;
+
+                // Kill any existing tweens on the transform to avoid overlap
+                PlayerScoreText.transform.DOKill();
+
+                // Scale up
+                PlayerScoreText.transform
+                    .DOScale(scaleUp, duration)
+                    .SetEase(Ease.OutBack)
+                    .OnComplete(() =>
+                    {
+                        // Change the text after scaling up
+                        PlayerScoreText.text = this.PlayerInfo.Score.ToString();
+
+                        // Scale back down to normal
+                        PlayerScoreText.transform
+                            .DOScale(1f, duration)
+                            .SetEase(Ease.InBack);
+                    });
             }
         }
 
